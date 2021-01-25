@@ -69,10 +69,10 @@ public class BaiduGeneral {
                     left = (Double) locations.get("left");
                     int y = top.intValue();
                     int  x = left.intValue();
-                    resultMap.put("x",x);
-                    resultMap.put("y",y);
-                    System.out.println("x ss" + x);
-                    System.out.println("y ss" + y);
+                    resultMap.put("x",x - 3);
+                    resultMap.put("y",y - 3);
+//                    System.out.println("x ss" + x);
+//                    System.out.println("y ss" + y);
                 }
             }
             return resultMap;
@@ -95,9 +95,9 @@ public class BaiduGeneral {
             // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
             String accessToken = AuthService.getAuth();//"[调用鉴权接口获取的token]";
             String responseStr = null;
-            if(highDefinition.equals("1"))
+            if(highDefinition.equals("1"))      //标清
                 responseStr = HttpUtil.post(URL, accessToken, param);
-            else if(highDefinition.equals("2"))
+            else if(highDefinition.equals("2")) //高清
                 responseStr = HttpUtil.post(HIGH_URL, accessToken, param);
             else {
                 LoggerUtils.error(BaiduGeneral.class , "图片识别错误，请检查脚本参数,标清为1，高清为2");
@@ -117,6 +117,7 @@ public class BaiduGeneral {
     public static void main(String[] args) throws AWTException, SubException {
 //        HandleService service = new HandleService();
 //        service.cut();
-        BaiduGeneral.general(RobotConstants.IMAGE_PATH, "1942年"  , "2");
+//        BaiduGeneral.general(RobotConstants.IMAGE_PATH, "1942年"  , "2");
+        BaiduGeneral.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\media\\image1.png" , "1");
     }
 }

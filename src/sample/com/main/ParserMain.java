@@ -95,6 +95,12 @@ public class ParserMain {
                 case RobotConstants.SELECTALL:
                     result = true;
                     break;
+                case RobotConstants.MOUSELOCATIONXY:
+                    result = true;
+                    break;
+                case RobotConstants.MOUSEMOVEANDCLICK:
+                    result = true;
+                    break;
             }
             return result;
         }
@@ -129,8 +135,12 @@ public class ParserMain {
         int strCount = 0;
         int currentLine = 1;
         while((lineText = br.readLine()) != null){
+            //两条斜杠代表注释，拿到行数据后首先将斜杠后的字符全部清除
+            if(lineText.contains("//")){
+                lineText = lineText.substring(0,lineText.indexOf("//"));
+            }
             //检查脚本每行是否是以分号结尾
-            if(lineText.lastIndexOf(";") + 1 != lineText.length()){
+            if(!lineText.endsWith(";")){
                 LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
             };
@@ -139,6 +149,7 @@ public class ParserMain {
                 LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
             }
+
             //创建结果map，最终结果处理为Map<String , Object[]>
             Map result = Maps.newHashMap();
 
@@ -205,7 +216,8 @@ public class ParserMain {
                         String param = paramArr[j];
                         if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)){
                             //3、在读取操作文件时，将数据与操作文件特定事件的参数做绑定
-                            System.out.println(param);
+//                            System.out.println(param);
+                            LoggerUtils.info(ParserMain.class , param);
                             param = StringUtils.getParamValue(param , RobotConstants.VAR_START_TAG , RobotConstants.VAR_END_TAG);
                             paramArr[j] = dataMap.get(param);
                         }
@@ -213,16 +225,16 @@ public class ParserMain {
                 }
                 //handleName通过后，想办法找到对应的方法，并将参数传入执行。
                 if (isHandleName){
-                    System.out.println("找到方法 ：" + handleName);
-                    Future<Object> f = ThreadConfiguration.THREAD_POOL.submit(new CallableTask("com.main.controller.HandleController", handleName, paramArr));
+//                    System.out.println("找到方法 ：" + handleName);
+                    Future<Object> f = ThreadConfiguration.THREAD_POOL.submit(new CallableTask("sample.com.main.controller.HandleController", handleName, paramArr));
                     try {
                         System.out.println("调用方法成功返回---"+ f.get());
                     } catch (InterruptedException e) {
-                        String error = "第" + i + "个函数出错，方法名为" + handleName + "，参数为" + values + "，请参照脚本手册检查。";
+                        String error = "第" + i + "个函数出错，方法名为" + handleName + "，参数为" + values + "，请参照脚本手册检查。\n";
                         LoggerUtils.error(ParserMain.class ,error , e);
                         throw new SubException(error , e);
                     } catch (ExecutionException e) {
-                        String error = "程序出错，请联系开发人员进行处理。";
+                        String error = "程序出错，请联系开发人员进行处理。\n";
                         LoggerUtils.error(ParserMain.class ,error , e);
                         throw new SubException(error , e);
                     }
@@ -276,7 +288,7 @@ public class ParserMain {
     }
 
     public static void main(String[] args) throws AWTException {
-        try {
+        /*try {
             ParserMain.start();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -284,7 +296,11 @@ public class ParserMain {
             e.printStackTrace();
         } catch (SubException e) {
             e.printStackTrace();
-        }
+        }*/
         //ParserMain.action("我要立案");
+        String a = "阿斯顿发斯蒂芬;//asdfasdfasdfasd";
+        a = a.substring(0,a.indexOf("//"));
+        System.out.println(a);
+        System.out.println(a.endsWith(";"));
     }
 }

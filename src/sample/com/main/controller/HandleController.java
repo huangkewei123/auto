@@ -32,6 +32,28 @@ public class HandleController {
     }
 
     /**
+     * 鼠标直接定位到X , Y坐标
+     * @param x x坐标
+     * @param y y坐标
+     * @return
+     */
+    public boolean mouseLocationXY(String x , String y){
+        proxy.mouseLocationXY(x , y);
+        return true;
+    }
+
+    /**
+     * 鼠标直接定位到X , Y坐标
+     * @param x x坐标
+     * @param y y坐标
+     * @return
+     */
+    public boolean mouseMoveAndClick(String x , String y) throws SubException {
+        proxy.mouseMoveAndClick(x , y);
+        return true;
+    }
+
+    /**
      * 鼠标定位
      * @param text
      * @return

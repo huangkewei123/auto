@@ -1,5 +1,7 @@
 package sample.com.constants;
 
+import sample.com.utils.ThreadConinfguration.Configuration;
+
 public class RobotConstants {
 
     /**
@@ -88,6 +90,15 @@ public class RobotConstants {
      * 全选快捷键
      */
     public final static String SELECTALL = "selectAll";
+    /**
+     * 全选快捷键
+     */
+    public final static String MOUSELOCATIONXY = "mouselocationXY";
+    /**
+     * 移动鼠标并且点击鼠标
+     */
+    public final static String MOUSEMOVEANDCLICK = "mousemoveandclick";
+
 
     /**
      * 自动截图的地址，始终只存在一张截图
@@ -192,6 +203,7 @@ public class RobotConstants {
         return null;
     }
 
-    //变量获取
+    //ocr开关，1：百度ocr  2：肖立ocr
+    public static final Integer OCR_SWITCH = Configuration.getInstance().getIntValue("ocr_switch");
 
 }

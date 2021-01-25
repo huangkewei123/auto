@@ -3,6 +3,7 @@ package sample;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import sample.com.constants.RobotConstants;
 import sample.com.utils.LoggerUtils;
 import sample.utils.StageController;
 import javafx.application.Application;
@@ -35,7 +36,7 @@ public class Main extends Application {
 //        //显示MainView舞台
 //        stageController.setStage(mainViewID);
 
-
+        RobotConstants.OPERATING_VAR = "start";
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("智能机器人");
         primaryStage.setScene(new Scene(root, 768, 599));

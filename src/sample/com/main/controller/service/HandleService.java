@@ -6,6 +6,7 @@ import sample.com.exception.SubException;
 import com.google.common.collect.Maps;
 import com.google.gson.internal.LinkedTreeMap;
 import sample.com.main.controller.HandleController;
+import sample.com.main.tessract.BaiduGeneral;
 import sample.com.main.tessract.XiaoLiTessract;
 import sample.com.utils.LoggerUtils;
 import sample.com.utils.ReflectUtil;
@@ -124,12 +125,22 @@ public class HandleService {
      * @param highDefinition 是否高清识别
      */
     private static Map<String ,Integer> imgOcr(String imgPath , String text , String highDefinition) throws AWTException, SubException {
-        Map result = XiaoLiTessract.general(imgPath,text );
+        Map result = null;
+        if(RobotConstants.OCR_SWITCH == 1){
+            result = BaiduGeneral.general(imgPath,text,highDefinition  );
+        }else{
+            result = XiaoLiTessract.general(imgPath,text );
+        }
+
         if(result.isEmpty()){
             for (int i = 0 ; i < 5 ; i++){
                 if(result.isEmpty()) {
                     HandleService.getSingleton().cut();
-                    result = XiaoLiTessract.general(imgPath, text);
+                    if(RobotConstants.OCR_SWITCH == 1){
+                        result = BaiduGeneral.general(imgPath,text,highDefinition  );
+                    }else{
+                        result = XiaoLiTessract.general(imgPath,text );
+                    }
                     if( i == 4 ) {
                         LoggerUtils.info(HandleService.class , "自动循环识别文字5次，仍然无法识别，自动退出，识别文字为：" + text);
                         //System.exit(0);
@@ -151,12 +162,21 @@ public class HandleService {
      * @param highDefinition 是否高清识别
      */
     private static ArrayList<Map> imgOcrGetResultStr(String imgPath , String highDefinition) throws AWTException, SubException {
-        ArrayList resultList = XiaoLiTessract.imgOcrGetResultStr(imgPath);
+        ArrayList resultList = null;
+        if(RobotConstants.OCR_SWITCH == 1){
+            resultList = BaiduGeneral.imgOcrGetResultStr(imgPath, highDefinition  );
+        }else{
+            resultList = XiaoLiTessract.imgOcrGetResultStr(imgPath );
+        }
         if(resultList.isEmpty()){
             for (int i = 0 ; i < 5 ; i++){
                 if(resultList.isEmpty()) {
                     HandleService.getSingleton().cut();
-                    resultList = XiaoLiTessract.imgOcrGetResultStr(imgPath);
+                    if(RobotConstants.OCR_SWITCH == 1){
+                        resultList = BaiduGeneral.imgOcrGetResultStr(imgPath, highDefinition  );
+                    }else{
+                        resultList = XiaoLiTessract.imgOcrGetResultStr(imgPath );
+                    }
                     if( i == 4 ) {
                         LoggerUtils.info(HandleService.class , "自动循环识别文字5次，仍然无法识别，自动退出");
 //                        System.exit(0);
@@ -193,8 +213,17 @@ public class HandleService {
      * @param x
      * @param y
      */
-    private void mouseLocationXY(String x , String y){
+    public void mouseLocationXY(String x , String y){
         r.mouseMove(Integer.parseInt(x) , Integer.parseInt(y));
+    }
+    /**
+     * 移动鼠标至坐标
+     * @param x
+     * @param y
+     */
+    public void mouseMoveAndClick(String x , String y) throws SubException {
+        r.mouseMove(Integer.parseInt(x) , Integer.parseInt(y));
+        this.mouseClick(1);
     }
 
     /**

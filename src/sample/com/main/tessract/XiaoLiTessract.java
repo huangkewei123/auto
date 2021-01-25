@@ -80,7 +80,7 @@ public class XiaoLiTessract {
 
 
     public static void main(String[] args) throws AWTException, SubException {
-        XiaoLiTessract.general("E:\\文档\\项目资料\\智能机器人\\衡阳诉讼系统截图\\image10.png", "盗剑瓶2难岛" );
-//        XiaoLiTessract.imgOcrGetResultStr("E:\\文档\\项目资料\\智能机器人\\衡阳诉讼系统截图\\image10.png");
+//        XiaoLiTessract.general("E:\\文档\\项目资料\\智能机器人\\衡阳诉讼系统截图\\image10.png", "盗剑瓶2难岛" );
+        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\media\\image1.png");
     }
 }

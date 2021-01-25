@@ -8,6 +8,7 @@ import sample.com.main.baidu.utils.Base64Util;
 import sample.com.main.baidu.utils.FileUtil;
 import sample.com.main.baidu.utils.GsonUtils;
 import sample.com.main.baidu.utils.HttpUtil;
+import sample.com.utils.LoggerUtils;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -50,15 +51,16 @@ public class Accurate {
                 String words = tree.get("words").toString();//解析的中文
                 if(ocrText.equals(words)){
                     System.out.println("文字匹配成功" + words);
+                    LoggerUtils.info(Accurate.class,"文字匹配成功" + words);
                     LinkedTreeMap locations = (LinkedTreeMap) tree.get("location");//中文坐标
                     top = (Double) locations.get("top");
                     left = (Double) locations.get("left");
                     int y = top.intValue();
                     int  x = left.intValue();
-                    resultMap.put("x",x);
-                    resultMap.put("y",y);
-                    System.out.println("x ss" + x);
-                    System.out.println("y ss" + y);
+                    resultMap.put("x",x - 3);
+                    resultMap.put("y",y -3);
+//                    System.out.println("x ss" + x);
+//                    System.out.println("y ss" + y);
                 }
             }
             return resultMap;
