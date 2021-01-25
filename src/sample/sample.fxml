@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane fx:id="sample" alignment="center" hgap="10" prefHeight="639.0" prefWidth="768.0" vgap="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+    <children>
+        <BorderPane prefHeight="625.0" prefWidth="748.0" GridPane.rowIndex="1">
+            <top>
+                <Pane prefHeight="170.0" prefWidth="748.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <Label layoutX="63.0" layoutY="28.0" prefHeight="23.0" prefWidth="73.0" text="案件信息表：" />
+                        <TextField fx:id="dataField" layoutX="136.0" layoutY="28.0" prefHeight="23.0" prefWidth="415.0" />
+                        <Button fx:id="dataButton" layoutX="580.0" layoutY="28.0" mnemonicParsing="false" onAction="#getDataFilePath" prefHeight="23.0" prefWidth="76.0" text="导入表格" />
+                        <Button fx:id="scriptButton" layoutX="580.0" layoutY="64.0" mnemonicParsing="false" onAction="#getScriptFilePath" prefHeight="23.0" prefWidth="76.0" text="导入脚本" />
+                        <TextField fx:id="scriptField" layoutX="136.0" layoutY="64.0" prefHeight="23.0" prefWidth="415.0" />
+                        <Label layoutX="63.0" layoutY="64.0" prefHeight="23.0" prefWidth="73.0" text="执行脚本：" />
+                        <Button fx:id="start" layoutX="387.0" layoutY="111.0" mnemonicParsing="false" onAction="#start" prefHeight="23.0" prefWidth="76.0" text="开始执行" />
+                        <Button fx:id="pause" layoutX="484.0" layoutY="111.0" mnemonicParsing="false" onAction="#pause" prefHeight="23.0" prefWidth="76.0" text="暂停" />
+                        <Button fx:id="stop" layoutX="580.0" layoutY="111.0" mnemonicParsing="false" onAction="#stop" prefHeight="23.0" prefWidth="76.0" text="结束" />
+                        <Label layoutX="63.0" layoutY="100.0" prefHeight="23.0" prefWidth="73.0" text="标准延迟：" />
+                        <TextField fx:id="normalDelay" layoutX="136.0" layoutY="100.0" prefHeight="23.0" prefWidth="42.0" />
+                        <Label layoutX="186.0" layoutY="100.0" prefHeight="23.0" prefWidth="20.0" text="秒" />
+                    </children>
+                </Pane>
+            </top>
+            <center>
+                <Pane prefHeight="394.0" prefWidth="748.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <TextArea fx:id="TextArea" layoutX="14.0" layoutY="14.0" prefHeight="392.0" prefWidth="721.0" />
+                    </children>
+                </Pane>
+            </center>
+        </BorderPane>
+    </children>
+    <columnConstraints>
+        <ColumnConstraints />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints />
+        <RowConstraints />
+    </rowConstraints>
+</GridPane>
