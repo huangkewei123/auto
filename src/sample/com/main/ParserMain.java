@@ -101,6 +101,9 @@ public class ParserMain {
                 case RobotConstants.MOUSEMOVEANDCLICK:
                     result = true;
                     break;
+                case RobotConstants.ENTER:
+                    result = true;
+                    break;
             }
             return result;
         }
@@ -212,14 +215,17 @@ public class ParserMain {
                     clazzParams = new Class [paramArr.length];
                     for (int j = 0 ; j < paramArr.length ; j++ ){
                         clazzParams[j] = paramArr[j].getClass();
-                        //如果脚本函数为inputText方法，则将参数与excel表中的数据绑定
+                        //将{{参数}}与excel表中的数据绑定
                         String param = paramArr[j];
                         if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)){
                             //3、在读取操作文件时，将数据与操作文件特定事件的参数做绑定
 //                            System.out.println(param);
                             LoggerUtils.info(ParserMain.class , param);
-                            param = StringUtils.getParamValue(param , RobotConstants.VAR_START_TAG , RobotConstants.VAR_END_TAG);
-                            paramArr[j] = dataMap.get(param);
+                            //将{{A}}处理成A
+                            paramArr[j] = StringUtils.variableChange(param , dataMap);
+//                            param = StringUtils.getParamValue(param , RobotConstants.VAR_START_TAG , RobotConstants.VAR_END_TAG);
+                            //将{{A}}处理成A
+//                            paramArr[j] = dataMap.get(param);
                         }
                     }
                 }

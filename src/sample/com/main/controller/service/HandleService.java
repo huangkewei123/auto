@@ -83,9 +83,9 @@ public class HandleService {
     public boolean keyPressWithCtrl(Integer key) {
         r.keyPress(KeyEvent.VK_CONTROL);
         r.keyPress(key);
-        r.keyRelease(key);
-        r.keyRelease(KeyEvent.VK_CONTROL);
         r.delay(100);
+        r.keyRelease(KeyEvent.VK_CONTROL);
+        r.keyRelease(key);
         return true;
     }
 
@@ -105,7 +105,6 @@ public class HandleService {
         r.keyPress(key);
         r.keyRelease(key);
         r.keyRelease(KeyEvent.VK_WINDOWS);
-        r.delay(100);
         return true;
     }
 
@@ -115,8 +114,14 @@ public class HandleService {
         Transferable tText = new StringSelection(str);
         clip.setContents(tText, null); //设置剪切板内容
         this.keyPressWithCtrl(KeyEvent.VK_V);//粘贴
-        r.delay(100);
     }
+
+    //打印出字符串
+    public void enter(){
+        r.keyPress(KeyEvent.VK_ENTER);//粘贴
+    }
+
+
 
     /**
      * 识别中文，并返回特定文字的坐标位置

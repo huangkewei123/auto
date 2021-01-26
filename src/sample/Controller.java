@@ -139,8 +139,10 @@ public class Controller implements ControlledStage, Initializable  {
             ThreadConfiguration.THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
+                    dataField.setText("E:\\文档\\项目资料\\智能机器人\\测试资料\\2_平顶山要素表.xlsx");
                     String dataFieldText = dataField.getText();
                     String scriptFieldText = scriptField.getText();
+
                     String delay = normalDelay.getText();
                     ProxyFactory.nomalDelay = delay;
                     if(StringUtils.isEmpty(scriptFieldText) || StringUtils.isEmpty(dataFieldText)){
@@ -162,7 +164,7 @@ public class Controller implements ControlledStage, Initializable  {
                         Thread.sleep(3000);
 
                         //键盘操作后再做下一步循环
-                        Scanner sc = new Scanner(System.in);
+//                        Scanner sc = new Scanner(System.in);
                         //1、读取数据表格
                         ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
                         TextArea.appendText("读取案件信息表数据\n");
@@ -186,8 +188,9 @@ public class Controller implements ControlledStage, Initializable  {
                                 break;
                             }
                             listIndex++;
-                            Platform.runLater(() -> TextArea.appendText("请输入任意文字并回车执行下一条。\n"));
-                            String str = sc.nextLine();
+                            Platform.runLater(() -> TextArea.appendText("一调数据执行完毕，请点击开始继续运行。\n"));
+                            pause();
+//                            String str = sc.nextLine();
 
                         }
                     } catch (InterruptedException e) {
@@ -204,7 +207,7 @@ public class Controller implements ControlledStage, Initializable  {
                         dataField.setDisable(false);
                         scriptField.setDisable(false);
                         dataButton.setDisable(false);
-                        dataButton.setDisable(false);
+                        scriptButton.setDisable(false);
                         pause.setDisable(true);
                         start.setDisable(false);
                         RobotConstants.OPERATING_VAR = "start";

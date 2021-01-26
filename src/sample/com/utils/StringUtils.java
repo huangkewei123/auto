@@ -1,5 +1,6 @@
 package sample.com.utils;
 
+import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
 
 import java.io.UnsupportedEncodingException;
@@ -8,6 +9,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -505,6 +507,28 @@ public class StringUtils {
 			throw new SubException("日期格式转换失败，请确认输入的值是否正确，输入值为：" + dateStr , e);
 		}
 		return dateStrArr;
+	}
+
+	/**
+	 * 返回变量转换后的最终值
+	 * @param str		脚本中的原始变量
+	 * @param dataMap	表头所对应的数据
+	 * @return
+	 */
+	public static String variableChange(String str, Map<String , String> dataMap) throws SubException {
+		String variable = null;
+		if(str.contains(RobotConstants.VAR_START_TAG)){
+			int x = str.indexOf(RobotConstants.VAR_START_TAG) + RobotConstants.VAR_START_TAG.length();
+			int y = str.indexOf(RobotConstants.VAR_END_TAG);
+			try {
+				variable = str.substring(x,y);
+				str = str.replace(str.substring(str.indexOf(RobotConstants.VAR_START_TAG),y + RobotConstants.VAR_END_TAG.length()),dataMap.get(variable));
+				str = variableChange(str  , dataMap);
+			} catch (NullPointerException e) {
+				throw new SubException("您填写的变量不存在，请仔细查阅表头是否包含此变量:{{" + variable + "}}。\n");
+			}
+		}
+		return str;
 	}
 
 }

@@ -43,13 +43,15 @@ public class ProxyFactory implements MethodInterceptor {
         LoggerUtils.info(ProxyFactory.class ,"正在调用方法：" + method.getName());
         nomalDelay = StringUtils.isEmpty(nomalDelay) ? "0" : nomalDelay;
         Integer delay = Integer.parseInt(nomalDelay);
+        //监听的方法全部延迟5秒操作
+        if(delay > 0){
+            HandleService.getRobot().delay(delay * 1000);
+        }
+
         //执行目标对象的方法
         Object returnValue = method.invoke(target, args);
 //        System.out.println("提交事务..." + returnValue);
-        //监听的方法全部延迟5秒操作
-        if(delay > 0){
-            HandleService.getRobot().delay(delay);
-        }
+
         return returnValue;
     }
 }

@@ -97,7 +97,12 @@ public class RobotConstants {
     /**
      * 移动鼠标并且点击鼠标
      */
-    public final static String MOUSEMOVEANDCLICK = "mousemoveandclick";
+    public final static String MOUSEMOVEANDCLICK = "mouseMoveAndClick";
+
+    /**
+     * 移动鼠标并且点击鼠标
+     */
+    public final static String ENTER = "enter";
 
 
     /**
@@ -205,5 +210,14 @@ public class RobotConstants {
 
     //ocr开关，1：百度ocr  2：肖立ocr
     public static final Integer OCR_SWITCH = Configuration.getInstance().getIntValue("ocr_switch");
+
+    //捕捉脚本动作的controller
+    public static final String HANDLE_CONTROLL = Configuration.getInstance().getValue("handle_controll");
+
+    //百度用户id
+    public static final String CLIENT_ID = Configuration.getInstance().getValue("client_id");
+
+    //百度授权码
+    public static final String CLIENT_SECRET = Configuration.getInstance().getValue("client_secret");
 
 }

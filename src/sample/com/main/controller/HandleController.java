@@ -156,6 +156,14 @@ public class HandleController {
     }
 
     /**
+     * 回车
+     */
+    public boolean enter() {
+        proxy.enter();
+        return RobotConstants.TRUE;
+    }
+
+    /**
      * 全屏截图
      * @return
      */

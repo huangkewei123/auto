@@ -1,6 +1,7 @@
 package sample.com.main.baidu;
 
 import org.json.JSONObject;
+import sample.com.constants.RobotConstants;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -23,11 +24,7 @@ public class AuthService {
      * }
      */
     public static String getAuth() {
-        // 官网获取的 API Key 更新为你注册的
-        String clientId = "grLC6HBzaYhFeVMTD79V2oP8";
-        // 官网获取的 Secret Key 更新为你注册的
-        String clientSecret = "KA8vlKjZ1FU1GRceBizQLXUzIt9BjNQ6";
-        return getAuth(clientId, clientSecret);
+        return getAuth(RobotConstants.CLIENT_ID, RobotConstants.CLIENT_SECRET);
     }
 
     /**
