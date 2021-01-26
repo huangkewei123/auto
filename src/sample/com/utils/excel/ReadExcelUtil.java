@@ -193,7 +193,7 @@ public class ReadExcelUtil {
             String temp = style.getDataFormatString();
             // 单元格设置成常规
             if (temp.equals("General")) {
-                format.applyPattern("#");
+                format.applyPattern("0.##");
             }
             value = format.format(values);
         }
