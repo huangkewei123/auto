@@ -3,6 +3,7 @@ package sample.test;
 import com.google.common.collect.Maps;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
+import sample.com.main.baidu.utils.Base64Util;
 import sample.com.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -73,5 +74,10 @@ public class Test {
             }
         }
         return str;
+    }
+
+    public void test(){
+
+//        Base64Util.generateImage(a,"image01.png");
     }
 }

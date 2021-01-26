@@ -30,7 +30,7 @@ public class HttpUtil {
 
     public static String post(String requestUrl, String accessToken, String contentType, String params, String encoding)
             throws Exception {
-        String url = requestUrl + "?access_token=" + accessToken;
+        String url = requestUrl + "?access_token=" + accessToken + "&require_labeled_img=ture";
         return HttpUtil.postGeneralUrl(url, contentType, params, encoding);
     }
 

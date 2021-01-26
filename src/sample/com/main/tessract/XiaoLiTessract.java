@@ -9,6 +9,7 @@ import sample.com.main.baidu.utils.FileUtil;
 import sample.com.main.baidu.utils.GsonUtils;
 import sample.com.main.baidu.utils.HttpUtil;
 import sample.com.utils.LoggerUtils;
+import sample.com.utils.StringUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public class XiaoLiTessract {
             String responseStr = HttpUtil.post(URL, null, param);
             Map responseMap = GsonUtils.fromJson(responseStr , new TypeToken<Map>() {}.getType());
             ArrayList resultList = (ArrayList) responseMap.get("words_result");
+            String respImgStr = responseMap.get("labeled_img") == null ? null : responseMap.get("labeled_img").toString();
+            if(StringUtils.isNotEmpty(respImgStr))
+                Base64Util.generateImage(respImgStr,"image01.png");
             return resultList;
         } catch (Exception e) {
             LoggerUtils.error(BaiduGeneral.class , e.getMessage());
@@ -81,6 +85,6 @@ public class XiaoLiTessract {
 
     public static void main(String[] args) throws AWTException, SubException {
 //        XiaoLiTessract.general("E:\\文档\\项目资料\\智能机器人\\衡阳诉讼系统截图\\image10.png", "盗剑瓶2难岛" );
-        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\media\\image1.png");
+        XiaoLiTessract.imgOcrGetResultStr("C:\\image10.png");
     }
 }
