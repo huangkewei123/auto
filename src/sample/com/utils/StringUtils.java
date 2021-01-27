@@ -442,7 +442,7 @@ public class StringUtils {
 	 * @return
 	 */
 	public static String getParamValueWithTag(String param ,String startTag , String endTag) {
-		String value = param.substring(param.indexOf(startTag), param.indexOf(endTag) + endTag.length());
+		String value = param.substring(param.indexOf(startTag), param.lastIndexOf(endTag) + endTag.length());
 		return value;
 	}
 
@@ -454,7 +454,7 @@ public class StringUtils {
 	 * @return
 	 */
 	public static String getParamValue(String param ,String startTag , String endTag) {
-		String value = param.substring(param.indexOf(startTag) + startTag.length(), param.indexOf(endTag));
+		String value = param.substring(param.indexOf(startTag) + startTag.length(), param.lastIndexOf(endTag));
 		return value;
 	}
 
@@ -588,10 +588,9 @@ public class StringUtils {
 
 	public static void main(String[] args) {
 		//直接获取当前时间戳
-		sf = new SimpleDateFormat("yyyyMMddHHmmssms");
-		Timestamp date = new Timestamp(System.currentTimeMillis());
-		String currentDate = sf.format(date);
-		System.out.println(currentDate);
+		String a = "ceshi(test(1));";
+		String t = getParamValue(a,"(",")");
+		System.out.println(t);
 	}
 
 }
