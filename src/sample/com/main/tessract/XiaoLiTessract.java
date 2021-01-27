@@ -45,12 +45,16 @@ public class XiaoLiTessract {
                 if(ocrText.equals(words)){
                     System.out.println("文字匹配成功---->:" + words);
                     LinkedTreeMap locations = (LinkedTreeMap) tree.get("location");//中文坐标
-                    Integer top = Integer.parseInt(locations.get("top").toString());
-                    Integer left = Integer.parseInt(locations.get("left").toString());
+                    Integer top = Integer.parseInt(locations.get("left").toString());
+                    Integer left = Integer.parseInt(locations.get("top").toString());
                     resultMap.put("x",top);
                     resultMap.put("y",left);
                 }
             }
+            //存储下解析返回的图片
+            String respImgStr = responseMap.get("labeled_img") == null ? null : responseMap.get("labeled_img").toString();
+            if(StringUtils.isNotEmpty(respImgStr))
+                Base64Util.generateImage(respImgStr,StringUtils.getTimeStampms()+".png");
             return resultMap;
         } catch (Exception e) {
             LoggerUtils.error(BaiduGeneral.class , e.getMessage());
@@ -73,7 +77,7 @@ public class XiaoLiTessract {
             ArrayList resultList = (ArrayList) responseMap.get("words_result");
             String respImgStr = responseMap.get("labeled_img") == null ? null : responseMap.get("labeled_img").toString();
             if(StringUtils.isNotEmpty(respImgStr))
-                Base64Util.generateImage(respImgStr,"image01.png");
+                Base64Util.generateImage(respImgStr,StringUtils.getTimeStampms()+".png");
             return resultList;
         } catch (Exception e) {
             LoggerUtils.error(BaiduGeneral.class , e.getMessage());
@@ -85,6 +89,6 @@ public class XiaoLiTessract {
 
     public static void main(String[] args) throws AWTException, SubException {
 //        XiaoLiTessract.general("E:\\文档\\项目资料\\智能机器人\\衡阳诉讼系统截图\\image10.png", "盗剑瓶2难岛" );
-        XiaoLiTessract.imgOcrGetResultStr("C:\\image10.png");
+        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\media\\image1.png");
     }
 }

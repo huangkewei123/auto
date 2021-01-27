@@ -1,5 +1,6 @@
 package sample.com.main.controller.proxy;
 
+import sample.com.constants.RobotConstants;
 import sample.com.main.controller.service.HandleService;
 import sample.com.utils.LoggerUtils;
 import sample.com.utils.StringUtils;
@@ -8,6 +9,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 
 /**
  * Cglib子类代理工厂
@@ -42,10 +44,10 @@ public class ProxyFactory implements MethodInterceptor {
 //        System.out.println("开始事务...");
         LoggerUtils.info(ProxyFactory.class ,"正在调用方法：" + method.getName());
         nomalDelay = StringUtils.isEmpty(nomalDelay) ? "0" : nomalDelay;
-        Integer delay = Integer.parseInt(nomalDelay);
+        BigDecimal delay = new BigDecimal(nomalDelay);
         //监听的方法全部延迟5秒操作
-        if(delay > 0){
-            HandleService.getRobot().delay(delay * 1000);
+        if(delay.compareTo(BigDecimal.ZERO) > 0){
+            HandleService.getRobot().delay(delay.multiply(RobotConstants.MS).intValue());
         }
 
         //执行目标对象的方法

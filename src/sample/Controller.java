@@ -139,7 +139,7 @@ public class Controller implements ControlledStage, Initializable  {
             ThreadConfiguration.THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
-                    dataField.setText("E:\\文档\\项目资料\\智能机器人\\测试资料\\2_平顶山要素表.xlsx");
+//                    dataField.setText("E:\\文档\\项目资料\\智能机器人\\测试资料\\2_平顶山要素表.xlsx");
                     String dataFieldText = dataField.getText();
                     String scriptFieldText = scriptField.getText();
 
@@ -188,7 +188,7 @@ public class Controller implements ControlledStage, Initializable  {
                                 break;
                             }
                             listIndex++;
-                            Platform.runLater(() -> TextArea.appendText("一调数据执行完毕，请点击开始继续运行。\n"));
+                            Platform.runLater(() -> TextArea.appendText("一条数据执行完毕，请点击开始继续运行。\n"));
                             pause();
 //                            String str = sc.nextLine();
 

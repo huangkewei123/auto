@@ -2,6 +2,8 @@ package sample.com.constants;
 
 import sample.com.utils.ThreadConinfguration.Configuration;
 
+import java.math.BigDecimal;
+
 public class RobotConstants {
 
     /**
@@ -219,5 +221,8 @@ public class RobotConstants {
 
     //百度授权码
     public static final String CLIENT_SECRET = Configuration.getInstance().getValue("client_secret");
+
+    //用于代理中将毫秒转换成秒的常量
+    public static final BigDecimal MS = new BigDecimal("1000");
 
 }
