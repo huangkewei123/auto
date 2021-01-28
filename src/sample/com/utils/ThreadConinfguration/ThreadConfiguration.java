@@ -16,6 +16,9 @@ public class ThreadConfiguration implements Serializable {
     public static final Integer THREAD_POOL_COUNT = Configuration.getInstance().getIntValue("thread_pool_count");
 
     public final static ExecutorService THREAD_POOL = Executors.newFixedThreadPool(THREAD_POOL_COUNT);
+    public final static String USER = Configuration.getInstance().getValue("user");
+    public final static String PASSWORD = Configuration.getInstance().getValue("password");
+    public final static String URL = Configuration.getInstance().getValue("url");
 
     public static List<Future<String>> TASKS = new ArrayList<Future<String>>();
 }
