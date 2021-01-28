@@ -172,6 +172,17 @@ public class Controller implements ControlledStage, Initializable  {
                         //循环excel表格中的所有数据
                         int listIndex = 1;
                         for (Map<String ,String > dataMap : list) {
+                            boolean isPause = RobotConstants.OPERATING_VAR.equals("pause");
+                            if(isPause) {
+                                Platform.runLater(() -> TextArea.appendText("程序已暂停\n"));
+                                while (isPause) {
+                                    try {
+                                        HandleService.getRobot().delay(3000);
+                                    } catch (AWTException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
                             //2、读取脚本文件，并返回脚本集，封为List
                             List<Map> result = ParserMain.readScriptForList(scriptFieldText);
                             Platform.runLater(() -> TextArea.appendText("脚本总共" + result.size() + "行\n"));
@@ -190,6 +201,7 @@ public class Controller implements ControlledStage, Initializable  {
                             listIndex++;
                             Platform.runLater(() -> TextArea.appendText("一条数据执行完毕，请点击开始继续运行。\n"));
                             pause();
+
 //                            String str = sc.nextLine();
 
                         }
