@@ -400,7 +400,7 @@ public class HandleService {
             //根据指定的区域抓取屏幕的指定区域，1300是长度，800是宽度。
             BufferedImage bi=r.createScreenCapture(new Rectangle(x,y,new Double(width).intValue() ,new Double(hight).intValue()));
             //把抓取到的内容写到一个jpg文件中
-            ImageIO.write(bi, "jpg", new File(RobotConstants.IMAGE_PATH));
+            ImageIO.write(bi, "png", new File(RobotConstants.IMAGE_PATH));
         } catch (IOException e) {
             LoggerUtils.error(HandleController.class , e.getMessage() , e);
             throw new SubException(ExceptionConstants.DONT_CUT_IMAGE);

@@ -110,7 +110,7 @@ public class RobotConstants {
     /**
      * 自动截图的地址，始终只存在一张截图
      */
-    public final static String IMAGE_PATH = "c:\\image.jpg";
+    public final static String IMAGE_PATH = "c:\\image.png";
 
     /**
      *

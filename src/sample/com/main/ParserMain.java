@@ -172,6 +172,9 @@ public class ParserMain {
                 LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
             }
+//            isr.close();
+//            br.close();
+//            fis.close();
         }
         return resultList;
     }

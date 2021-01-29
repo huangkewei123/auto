@@ -136,6 +136,7 @@ public class Controller implements ControlledStage, Initializable  {
             start.setDisable(true);
             RobotConstants.OPERATING_VAR = "start";
         }else
+
             ThreadConfiguration.THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -176,6 +177,7 @@ public class Controller implements ControlledStage, Initializable  {
                             if(isPause) {
                                 Platform.runLater(() -> TextArea.appendText("程序已暂停\n"));
                                 while (isPause) {
+//                                    break;
                                     try {
                                         HandleService.getRobot().delay(3000);
                                     } catch (AWTException e) {
@@ -235,9 +237,7 @@ public class Controller implements ControlledStage, Initializable  {
             RobotConstants.OPERATING_VAR = "pause";
             start.setDisable(false);
             pause.setDisable(true);
-        }/*else{
-            TextArea.appendText("当前程序未启动或已暂停，无法执行当前操作\n");
-        }*/
+        }
     }
 
     /**
