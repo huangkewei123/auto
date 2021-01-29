@@ -24,6 +24,9 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * 解析脚本、调用动作的主类
+ */
 public class ParserMain {
 
     /**
@@ -148,16 +151,25 @@ public class ParserMain {
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
             };
             //脚本中不允许存在空行命令
-            if (StringUtils.isEmpty(lineText)){
-                LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
-                throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
-            }
+            currentLine = getCurrentLine(lineText, resultList, currentLine);
+        }
+//      isr.close();
+//      br.close();
+//      fis.close();
+        return resultList;
+    }
 
+    private static int getCurrentLine(String lineText, List<Map> resultList, int currentLine) throws SubException {
+        String handleName;
+        int strCount;
+        if (StringUtils.isNotEmpty(lineText.trim())){
+//                LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
+//                throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
             //创建结果map，最终结果处理为Map<String , Object[]>
             Map result = Maps.newHashMap();
 
             //兼容支持在同一行内编辑多个函数，以分号分割
-            strCount = getCount(lineText , ";");
+            strCount = getCount(lineText, ";");
             if(strCount >= 1){
                 String [] textArr = lineText.split(";");
                 //循环取出函数并放入resultList里
@@ -172,11 +184,8 @@ public class ParserMain {
                 LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
             }
-//            isr.close();
-//            br.close();
-//            fis.close();
         }
-        return resultList;
+        return currentLine;
     }
 
     /**
@@ -252,34 +261,6 @@ public class ParserMain {
         }
     }
 
-    public static void start() throws InterruptedException, IOException, SubException {
-        String dataFieldText = "G:\\job\\1_黑龙江50件要素清单表完整版文书生成.xlsx";
-        String scriptFieldText = "G:\\job\\被告信息填写.txt";
-        String delay = "1";
-        ProxyFactory.nomalDelay = delay;
-        if(StringUtils.isEmpty(scriptFieldText) || StringUtils.isEmpty(dataFieldText)){
-            System.out.println("未选择案件信息表或执行脚本，请选择完成后开始执行");
-            LoggerUtils.error(ParserMain.class,"未选择案件信息表或执行脚本，请选择完成后开始执行");
-        }
-        System.out.println("准备开始执行");
-        Thread.sleep(5000);
-
-        //键盘操作后再做下一步循环
-        Scanner sc = new Scanner(System.in);
-        //1、读取数据表格
-        ReadExcelUtil readExcelUtil=new ReadExcelUtil(dataFieldText);
-        System.out.println("读取案件信息表数据");
-        List<Map<String ,String >> list = readExcelUtil.getObjectsList();
-        //每条数据都需循环
-        for (Map<String ,String > dataMap : list) {
-            //2、读取操作文件
-            List<Map> result = ParserMain.readScriptForList(scriptFieldText);
-            ParserMain.action(dataMap, result);
-//                String str = sc.nextLine();
-//                System.out.println(str);
-        }
-    }
-
     public static int getCount(String mainStr,String subStr){
         int minLength=mainStr.length();
         int subLength=subStr.length();
@@ -295,6 +276,8 @@ public class ParserMain {
         }
         return -1;
     }
+
+
 
     public static void main(String[] args) throws AWTException {
         /*try {
