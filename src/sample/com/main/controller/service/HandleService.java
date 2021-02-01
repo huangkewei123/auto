@@ -525,6 +525,16 @@ public class HandleService {
     }
 
     /**
+     * 删除
+     * @return
+     */
+    public boolean delete(){
+        r.keyPress(KeyEvent.VK_BACK_SPACE);
+        r.keyRelease(KeyEvent.VK_BACK_SPACE);
+        return true;
+    }
+
+    /**
      * 循环波动表盘，滚动至目标值
      * @param count            所需判断的年份、月份、日期
      * @param locationMap    所有表盘中值得位置信息

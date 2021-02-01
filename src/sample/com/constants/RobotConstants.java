@@ -106,6 +106,11 @@ public class RobotConstants {
      */
     public final static String ENTER = "enter";
 
+    /**
+     * 删除操作
+     */
+    public final static String DELETE = "delete";
+
 
     /**
      * 自动截图的地址，始终只存在一张截图

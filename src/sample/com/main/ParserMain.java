@@ -107,6 +107,9 @@ public class ParserMain {
                 case RobotConstants.ENTER:
                     result = true;
                     break;
+                case RobotConstants.DELETE:
+                    result = true;
+                    break;
             }
             return result;
         }
@@ -134,37 +137,53 @@ public class ParserMain {
         InputStreamReader isr = new InputStreamReader(fis,"GBK");
         BufferedReader br = new BufferedReader(isr);
         //每行的文字
-        String lineText = null;
-        //操作名称
-        String handleName = null;
-        List<Map> resultList = new ArrayList<Map>();
-        int strCount = 0;
-        int currentLine = 1;
-        while((lineText = br.readLine()) != null){
-            //两条斜杠代表注释，拿到行数据后首先将斜杠后的字符全部清除
-            if(lineText.contains("//")){
-                lineText = lineText.substring(0,lineText.indexOf("//"));
+        List<Map> resultList;
+        try {
+            String lineText = null;
+            //操作名称
+//        String handleName = null;
+            resultList = new ArrayList<Map>();
+//        int strCount = 0;
+            int currentLine = 1;
+            while((lineText = br.readLine()) != null){
+                //判断是否为空行，空行跳过
+                if(StringUtils.isEmpty(lineText.trim())){
+                    continue;
+                }
+                //判断是否是注释行,注释行跳过
+                lineText = getString(lineText);
+                if (lineText == null) continue;
+                //检查脚本每行是否是以分号结尾
+                if(!lineText.endsWith(";")){
+                    LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
+                    throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
+                };
+                currentLine = getCurrentLine(lineText, resultList, currentLine);
             }
-            //检查脚本每行是否是以分号结尾
-            if(!lineText.endsWith(";")){
-                LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-                throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-            };
-            //脚本中不允许存在空行命令
-            currentLine = getCurrentLine(lineText, resultList, currentLine);
+        } finally {
+            isr.close();
+            br.close();
+            fis.close();
         }
-//      isr.close();
-//      br.close();
-//      fis.close();
+
         return resultList;
+    }
+
+    private static String getString(String lineText) {
+        //两条斜杠代表注释，拿到行数据后首先将斜杠后的字符全部清除
+        if(lineText.contains("//")){
+            if(lineText.indexOf("//") == 0)
+                return null;
+            else
+                lineText = lineText.substring(0, lineText.indexOf("//"));
+        }
+        return lineText;
     }
 
     private static int getCurrentLine(String lineText, List<Map> resultList, int currentLine) throws SubException {
         String handleName;
         int strCount;
         if (StringUtils.isNotEmpty(lineText.trim())){
-//                LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
-//                throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.SCRIPT_SOME_ROWS_NULL);
             //创建结果map，最终结果处理为Map<String , Object[]>
             Map result = Maps.newHashMap();
 
@@ -180,10 +199,10 @@ public class ParserMain {
                     resultList.add(result);
                     currentLine++;
                 }
-            }else if(strCount == 0){
+            }/*else if(strCount == 0){
                 LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
                 throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
-            }
+            }*/
         }
         return currentLine;
     }
@@ -261,6 +280,7 @@ public class ParserMain {
         }
     }
 
+    /*兼容支持在同一行内编辑多个函数，以分号分割*/
     public static int getCount(String mainStr,String subStr){
         int minLength=mainStr.length();
         int subLength=subStr.length();
@@ -277,7 +297,17 @@ public class ParserMain {
         return -1;
     }
 
+    /**
+     * 脚本逻辑判断解析
+     * @param lineText      脚本行数据
+     * @param resultList    返回的list
+     * @param currentLine   当前行数
+     * @return
+     */
+    public boolean logicalJudgment(String lineText, List<Map> resultList, int currentLine){
 
+        return false;
+    }
 
     public static void main(String[] args) throws AWTException {
         /*try {

@@ -20,31 +20,14 @@ public class Test {
         dataMap.put("测试层级","测试一下");
 
 
-        /*if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)){
-            String arr[] = param.split("/");
-            for (int i = 0 ; i < arr.length ; i++ ) {
-                String p = arr[i];
-                if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)) {
-                    if()
-                    int start = p.indexOf(RobotConstants.VAR_START_TAG);
-                    int end = p.indexOf(RobotConstants.VAR_END_TAG);
-                    p = p.substring(start , end);
-                    //3、在读取操作文件时，将数据与操作文件特定事件的参数做绑定
-                    param = StringUtils.getParamValue(param, RobotConstants.VAR_START_TAG, RobotConstants.VAR_END_TAG);
-                    //将{{A}}处理成A
-                    paramArr[j] = dataMap.get(param);
-                }
-            }
+//        param = charCount(param , dataMap);
+//        System.out.println(param);
 
-            System.out.println(param);
-        }*/
-        /*List<String> list = new ArrayList<String>();
-        list = charCount(param,list , dataMap);
-        for (String a : list ) {
-            System.out.println(a);
-        }*/
-        param = charCount(param , dataMap);
-        System.out.println(param);
+        int index = param.indexOf("{{");
+        char [] a = param.toCharArray();
+        for (char s : a ) {
+            System.out.println(s);
+        }
 
     }
 
