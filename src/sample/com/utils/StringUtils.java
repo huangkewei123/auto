@@ -593,4 +593,14 @@ public class StringUtils {
 		System.out.println(t);
 	}
 
+	/**
+	 * 截取符号之前的字符串
+	 * @param	text	原始字符串
+	 * @param 	startTag 截取到的tag
+	 * @return
+	 */
+	public static String subStartTagBefore(String text , String startTag){
+		return text.substring(0 , text.indexOf(startTag));
+	}
+
 }

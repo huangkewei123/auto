@@ -8,6 +8,7 @@ import sample.com.exception.SubException;
 import sample.com.main.baidu.utils.FileUtil;
 import sample.com.main.controller.proxy.ProxyFactory;
 import sample.com.main.controller.service.HandleService;
+import sample.com.utils.ExpressionChanged;
 import sample.com.utils.LoggerUtils;
 import sample.com.utils.ReflectUtil;
 import sample.com.utils.StringUtils;
@@ -17,10 +18,8 @@ import sample.com.utils.excel.ReadExcelUtil;
 
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -110,6 +109,9 @@ public class ParserMain {
                 case RobotConstants.DELETE:
                     result = true;
                     break;
+                case RobotConstants.SEARCH:
+                    result = true;
+                    break;
             }
             return result;
         }
@@ -145,20 +147,33 @@ public class ParserMain {
             resultList = new ArrayList<Map>();
 //        int strCount = 0;
             int currentLine = 1;
+            String logicFlag = null;
             while((lineText = br.readLine()) != null){
                 //判断是否为空行，空行跳过
                 if(StringUtils.isEmpty(lineText.trim())){
                     continue;
                 }
                 //判断是否是注释行,注释行跳过
-                lineText = getString(lineText);
-                if (lineText == null) continue;
-                //检查脚本每行是否是以分号结尾
-                if(!lineText.endsWith(";")){
-                    LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-                    throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-                };
-                currentLine = getCurrentLine(lineText, resultList, currentLine);
+                lineText = getNonAnnotated(lineText);
+                //如果当前行为逻辑控制语句，则进入
+                if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
+                    //逻辑语句封装到list中
+                    /*
+                        封装规则为：map(if , (表达式))
+                        if/elif下的逻辑块内容则以如下方式封装
+                        map(if-handleName ,  正常参数)、map(elif-handleName ,  正常参数)。
+                        其中if-/elif-为固定格式，作为标记
+                     */
+                    logicalPackage(lineText , resultList , currentLine );
+                    logicFlag = isLogic(lineText);
+                }else{
+                    //检查脚本每行是否是以分号结尾
+                    if(!lineText.endsWith(";")){
+                        LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
+                        throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
+                    }
+                    currentLine = getCurrentLine(lineText, resultList, currentLine , logicFlag);
+                }
             }
         } finally {
             isr.close();
@@ -169,7 +184,12 @@ public class ParserMain {
         return resultList;
     }
 
-    private static String getString(String lineText) {
+    /**
+     * 注释判断
+     * @param lineText
+     * @return
+     */
+    private static String getNonAnnotated(String lineText) {
         //两条斜杠代表注释，拿到行数据后首先将斜杠后的字符全部清除
         if(lineText.contains("//")){
             if(lineText.indexOf("//") == 0)
@@ -180,31 +200,142 @@ public class ParserMain {
         return lineText;
     }
 
-    private static int getCurrentLine(String lineText, List<Map> resultList, int currentLine) throws SubException {
+    /**
+     * 获取函数处于的行
+     * 并将拆解开后的函数存入list中
+     * @param lineText      脚本文件中当前行书
+     * @param resultList    存储脚本结构的list
+     * @param currentLine   当前行
+     * @param logicFlag     逻辑标签，标签值为if或者elif,用于标记当前行的函数是否属于逻辑判断体
+     * @return
+     * @throws SubException
+     */
+    private static int getCurrentLine(String lineText, List<Map> resultList, int currentLine ,String logicFlag)  {
         String handleName;
         int strCount;
         if (StringUtils.isNotEmpty(lineText.trim())){
             //创建结果map，最终结果处理为Map<String , Object[]>
             Map result = Maps.newHashMap();
-
             //兼容支持在同一行内编辑多个函数，以分号分割
-            strCount = getCount(lineText, ";");
+            strCount = getFunctionCount(lineText, ";");
             if(strCount >= 1){
                 String [] textArr = lineText.split(";");
                 //循环取出函数并放入resultList里
                 for (String text : textArr) {
                     int index = text.indexOf(RobotConstants.PARAM_START_TAG);
                     handleName = text.substring(0 , index);
-                    result.put(handleName , StringUtils.getParamValue(text , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
+                    if(StringUtils.isNotEmpty(logicFlag))
+                        //如果逻辑标记不为空，则在函数前加入其逻辑标签
+                        result.put( logicFlag + "-" +handleName.trim() , StringUtils.getParamValue(text , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
+                    else
+                        //逻辑标签为空则略过
+                        result.put(handleName , StringUtils.getParamValue(text , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
                     resultList.add(result);
                     currentLine++;
                 }
-            }/*else if(strCount == 0){
-                LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
-                throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.NO_SEMICOLON);
-            }*/
+            }
+
         }
         return currentLine;
+    }
+
+    /**
+     * 兼容支持在同一行内编辑多个函数，以分号分割
+     */
+    public static int getFunctionCount(String mainStr,String subStr){
+        int minLength=mainStr.length();
+        int subLength=subStr.length();
+        int count=0;
+        int index=0;
+
+        if(minLength>=subLength){
+            while ((index=mainStr.indexOf(subStr,index))!=-1){
+                count++;
+                index+=subLength;
+            }
+            return count;
+        }
+        return -1;
+    }
+
+    /**
+     * 脚本中的if函数判断
+     * @param lineText      脚本行数据
+     * @param currentLine   当前行数
+     * @return
+     */
+    public static boolean isLogicalJudgment(String lineText,Integer currentLine ,String logicFlag) throws SubException {
+        //如果不包含括号，则进入以下逻辑
+        //因为endif不包含括号，且一行中只可以有endif
+        if(!lineText.contains(RobotConstants.PARAM_START_TAG)){
+            if(!lineText.equals(RobotConstants.ENDIF_TAG)){
+                throw new SubException("请检查当前行是否错误，除endif外，其他方法都需加上()，错误行为：" + currentLine);
+            }
+        }else {
+            //判断字符串是否是if/elif
+            if(StringUtils.isEmpty(logicFlag))
+                if(StringUtils.isNotEmpty(isLogic(lineText))){
+                    return true;
+                }else {
+                    return false;
+                }
+            else
+                //检查逻辑体是否符合格式，正确格式必须带有缩进
+                if(!lineText.contains("\t")) {
+                    throw new SubException("请检查当前行是否符合逻辑体规范，逻辑体必须包含缩进，当前行为：第" + currentLine + "行");
+                }
+        }
+        return false;
+    }
+
+    /**
+     * 是否是逻辑语句
+     * @param lineText
+     * @return
+     */
+    private static String isLogic(String lineText) {
+        //如果包含括号，则进入以下逻辑
+        String str = StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG);
+        //如果在(之前是if，则认定此语句为if判断语句
+        if(str.equals(RobotConstants.IF_TAG)){
+            return RobotConstants.IF_TAG;
+        }else if(str.equals(RobotConstants.ELIF_TAG)){//将括号中的判断值取出转化为java中的判断语句
+            return RobotConstants.ELIF_TAG;
+        }
+        return null;
+    }
+
+    /**
+     * 将if函数封装
+     * @param lineText
+     */
+    private static void logicalPackage(String lineText , List<Map> upperLayerList , Integer currentLine ) throws SubException {
+        //首先进行if语句的语法判断
+        //if语句的语法为        if(表达式):
+        //如果是if语句，则最后以冒号结尾
+        if (lineText.endsWith(":")) {
+            Map result = Maps.newHashMap();
+            //取出括号中的表达式
+            String expression = StringUtils.getParamValue(lineText, RobotConstants.PARAM_START_TAG, RobotConstants.PARAM_END_TAG);
+            // TODO 判断if中是正常表达式，还是自定义的函数
+            /*
+                得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
+                例如methodA();  则取出methodA判断是否是系统中定义的方法
+            */
+//            if (expression.contains(RobotConstants.PARAM_START_TAG)) {
+                //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
+//                if (parserHandle(expression.substring(0, expression.indexOf(RobotConstants.PARAM_START_TAG)))) {
+                    result.put(RobotConstants.IF_TAG, expression);
+                    upperLayerList.add(result);
+//                }else {
+                    //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
+//                    boolean result = ExpressionChanged.isEnable(expression , null, null);
+//                }
+//                }
+//            } else {
+//                throw new SubException("请检查if语句定义是否不符合规范，当前行为:" + currentLine);
+//            }
+        }
     }
 
     /**
@@ -280,36 +411,8 @@ public class ParserMain {
         }
     }
 
-    /*兼容支持在同一行内编辑多个函数，以分号分割*/
-    public static int getCount(String mainStr,String subStr){
-        int minLength=mainStr.length();
-        int subLength=subStr.length();
-        int count=0;
-        int index=0;
-
-        if(minLength>=subLength){
-            while ((index=mainStr.indexOf(subStr,index))!=-1){
-                count++;
-                index+=subLength;
-            }
-            return count;
-        }
-        return -1;
-    }
-
-    /**
-     * 脚本逻辑判断解析
-     * @param lineText      脚本行数据
-     * @param resultList    返回的list
-     * @param currentLine   当前行数
-     * @return
-     */
-    public boolean logicalJudgment(String lineText, List<Map> resultList, int currentLine){
-
-        return false;
-    }
-
-    public static void main(String[] args) throws AWTException {
+    public static void main(String[] args) throws AWTException, IOException, SubException {
+//        logicalJudgment(null,null,0);
         /*try {
             ParserMain.start();
         } catch (InterruptedException e) {
@@ -320,9 +423,21 @@ public class ParserMain {
             e.printStackTrace();
         }*/
         //ParserMain.action("我要立案");
-        String a = "阿斯顿发斯蒂芬;//asdfasdfasdfasd";
-        a = a.substring(0,a.indexOf("//"));
-        System.out.println(a);
-        System.out.println(a.endsWith(";"));
+//        String a = "阿斯顿发斯蒂芬;//asdfasdfasdfasd";
+//        a = a.substring(0,a.indexOf("//"));
+//        System.out.println(a);
+//        System.out.println(a.endsWith(";"));
+
+//        String a = "a";
+//        System.out.println(a.contains("\t"));
+//        System.out.println("1231\t235555");
+
+        List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
+        for ( Map<String ,String > map : list) {
+            for (String a : map.keySet()) {
+                System.out.println(a + " -------------- " + map.get(a));
+            }
+
+        }
     }
 }

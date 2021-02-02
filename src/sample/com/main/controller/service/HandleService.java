@@ -535,6 +535,20 @@ public class HandleService {
     }
 
     /**
+     * 搜索当前图片中是否有需要的文字
+     * @param text 需要搜索的文字
+     * @return
+     */
+    public boolean search(String text){
+        Map result = XiaoLiTessract.general(RobotConstants.IMAGE_PATH , text);
+        //返回结果为空，则说明没搜到，返回false
+        if(result.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 循环波动表盘，滚动至目标值
      * @param count            所需判断的年份、月份、日期
      * @param locationMap    所有表盘中值得位置信息

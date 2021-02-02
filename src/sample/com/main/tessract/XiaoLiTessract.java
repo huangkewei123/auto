@@ -8,6 +8,7 @@ import sample.com.main.baidu.utils.Base64Util;
 import sample.com.main.baidu.utils.FileUtil;
 import sample.com.main.baidu.utils.GsonUtils;
 import sample.com.main.baidu.utils.HttpUtil;
+import sample.com.main.controller.service.HandleService;
 import sample.com.utils.LoggerUtils;
 import sample.com.utils.StringUtils;
 
@@ -88,8 +89,10 @@ public class XiaoLiTessract {
 
 
     public static void main(String[] args) throws AWTException, SubException {
-//        XiaoLiTessract.general("C:\\image.png", "我婴申请立煞" );
+        HandleService.getSingleton().cut();
+        Map a = XiaoLiTessract.general("C:\\image.png", "我111" );
+        System.out.println(a.isEmpty());
 //        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\微信图片_20210129121416.png");
-        XiaoLiTessract.imgOcrGetResultStr("C:\\image.png");
+//        XiaoLiTessract.imgOcrGetResultStr("C:\\image.png");
     }
 }

@@ -111,6 +111,11 @@ public class RobotConstants {
      */
     public final static String DELETE = "delete";
 
+    /**
+     * 搜索操作
+     */
+    public final static String SEARCH = "search";
+
 
     /**
      * 自动截图的地址，始终只存在一张截图
@@ -229,5 +234,13 @@ public class RobotConstants {
 
     //用于代理中将毫秒转换成秒的常量
     public static final BigDecimal MS = new BigDecimal("1000");
+
+    //-------------------------------------------逻辑判断标签
+    public static final String IF_TAG = "if";
+
+    public static final String ELIF_TAG = "elif";
+
+    public static final String ENDIF_TAG = "endif";
+
 
 }
