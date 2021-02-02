@@ -240,7 +240,17 @@ public class RobotConstants {
 
     public static final String ELIF_TAG = "elif";
 
+    public static final String ELSE_TAG = "else";
+
     public static final String ENDIF_TAG = "endif";
+
+    //-------------------------------------------逻辑体函数
+    public static final String IF_TAG_HANDLE = "if-";
+
+    public static final String ELIF_TAG_HANDLE = "elif-";
+
+    public static final String ELSE_TAG_HANDLE = "else-";
+
 
 
 }

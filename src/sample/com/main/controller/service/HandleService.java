@@ -76,7 +76,7 @@ public class HandleService {
         r.keyRelease(key);
         r.keyRelease(KeyEvent.VK_SHIFT);
         r.delay(100);
-        return true;
+        return RobotConstants.TRUE;
     }
 
     // ctrl+ 按键
@@ -86,7 +86,7 @@ public class HandleService {
         r.delay(100);
         r.keyRelease(KeyEvent.VK_CONTROL);
         r.keyRelease(key);
-        return true;
+        return RobotConstants.TRUE;
     }
 
     // alt+ 按键
@@ -95,8 +95,7 @@ public class HandleService {
         r.keyPress(key);
         r.keyRelease(key);
         r.keyRelease(KeyEvent.VK_ALT);
-        r.delay(100);
-        return true;
+        return RobotConstants.TRUE;
     }
 
     // windows+ 按键
@@ -105,20 +104,22 @@ public class HandleService {
         r.keyPress(key);
         r.keyRelease(key);
         r.keyRelease(KeyEvent.VK_WINDOWS);
-        return true;
+        return RobotConstants.TRUE;
     }
 
     //打印出字符串
-    public void keyPressString(String str){
+    public boolean keyPressString(String str){
         Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();//获取剪切板
         Transferable tText = new StringSelection(str);
         clip.setContents(tText, null); //设置剪切板内容
         this.keyPressWithCtrl(KeyEvent.VK_V);//粘贴
+        return RobotConstants.TRUE;
     }
 
     //打印出字符串
-    public void enter(){
+    public boolean enter(){
         r.keyPress(KeyEvent.VK_ENTER);//粘贴
+        return RobotConstants.TRUE;
     }
 
 
@@ -158,7 +159,6 @@ public class HandleService {
             }
         }
         return result;
-//        return Accurate.accurate(imgPath , text);
     }
 
     /**
@@ -218,17 +218,19 @@ public class HandleService {
      * @param x
      * @param y
      */
-    public void mouseLocationXY(String x , String y){
+    public boolean mouseLocationXY(String x , String y){
         r.mouseMove(Integer.parseInt(x) , Integer.parseInt(y));
+        return RobotConstants.TRUE;
     }
     /**
      * 移动鼠标至坐标
      * @param x
      * @param y
      */
-    public void mouseMoveAndClick(String x , String y) throws SubException {
+    public boolean mouseMoveAndClick(String x , String y) throws SubException {
         r.mouseMove(Integer.parseInt(x) , Integer.parseInt(y));
         this.mouseClick(1);
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -253,7 +255,7 @@ public class HandleService {
      * @param direction
      * @param highDefinition 是否高清识别
      */
-    public void mouseOffset(String text , Integer offset , String direction ,String highDefinition) throws AWTException, SubException {
+    public boolean mouseOffset(String text , Integer offset , String direction ,String highDefinition) throws AWTException, SubException {
         ReflectUtil.notNull(direction , "偏移方向不能为空");
         if(direction.equals("上")) {
             mouseLocation(text, 0, -offset , highDefinition);
@@ -264,7 +266,7 @@ public class HandleService {
         }else if(direction.equals("右")) {
             mouseLocation(text, offset, 0 ,highDefinition);
         }
-        r.delay(100);
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -272,7 +274,7 @@ public class HandleService {
      * @param offset
      * @param direction
      */
-    public void mouseOffset(Integer offset , String direction){
+    public boolean mouseOffset(Integer offset , String direction){
         ReflectUtil.notNull(direction , "偏移方向不能为空");
         PointerInfo pointer = MouseInfo.getPointerInfo();
         Point point = pointer.getLocation();
@@ -290,24 +292,26 @@ public class HandleService {
         }else if(direction.equals("右")) {
             r.mouseMove( x.intValue() + offset, y.intValue());
         }
+        return RobotConstants.TRUE;
     }
 
 
     //按下鼠标
-    public void mousePress(){
+    public boolean mousePress(){
         r.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        //r.delay(100);
+        return RobotConstants.TRUE;
     }
 
     //释放鼠标
-    public void mouseRelease(){
+    public boolean mouseRelease(){
         r.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        return RobotConstants.TRUE;
     }
 
-    private void mouseClick(){
+    private boolean mouseClick(){
         mousePress();
         mouseRelease();
-        r.delay(1000);
+        return RobotConstants.TRUE;
     }
 
     //按下鼠标
@@ -332,7 +336,7 @@ public class HandleService {
      */
     public boolean copyText(String text){
         keyPressString(text); //输入字符串
-        return true;
+        return RobotConstants.TRUE;
     }
 
 
@@ -340,11 +344,12 @@ public class HandleService {
      * 全屏截图
      * @return
      */
-    public void cut() throws SubException {
+    public boolean cut() throws SubException {
         Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
         Frame f = new Frame();
         Insets   screenInsets   =   Toolkit.getDefaultToolkit().getScreenInsets(f.getGraphicsConfiguration());
         cutImage(screenInsets.left ,screenInsets.top , screenSize.width   -   screenInsets.left   -   screenInsets.right , screenSize.height   -   screenInsets.top   -   screenInsets.bottom);
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -355,8 +360,9 @@ public class HandleService {
      * @param hight
      * @return
      */
-    public void cut(Integer x, Integer y , double width , double hight) throws SubException {
+    public boolean cut(Integer x, Integer y , double width , double hight) throws SubException {
         this.cutImage(x , y , width , hight);
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -395,12 +401,13 @@ public class HandleService {
      * @param width
      * @param hight
      */
-    private void cutImage(Integer x, Integer y , double width , double hight) throws SubException {
+    private boolean cutImage(Integer x, Integer y , double width , double hight) throws SubException {
         try {
             //根据指定的区域抓取屏幕的指定区域，1300是长度，800是宽度。
             BufferedImage bi=r.createScreenCapture(new Rectangle(x,y,new Double(width).intValue() ,new Double(hight).intValue()));
             //把抓取到的内容写到一个jpg文件中
             ImageIO.write(bi, "png", new File(RobotConstants.IMAGE_PATH));
+            return RobotConstants.TRUE;
         } catch (IOException e) {
             LoggerUtils.error(HandleController.class , e.getMessage() , e);
             throw new SubException(ExceptionConstants.DONT_CUT_IMAGE);
@@ -421,7 +428,7 @@ public class HandleService {
             LoggerUtils.error(this.getClass() , "鼠标滚轮转动次数必须为数字" , e);
             throw new SubException("鼠标滚轮转动次数必须为数字" , e);
         }
-        return true;
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -434,7 +441,7 @@ public class HandleService {
         Integer waitTime = second * 1000;
         if(waitTime <= RobotConstants.WAIT_TIME){
             r.delay(waitTime);
-            return true;
+            return RobotConstants.TRUE;
         }
         LoggerUtils.error(this.getClass() , ExceptionConstants.WAIT_TIME_EXCEPTION + RobotConstants.WAIT_TIME);
         throw new SubException(ExceptionConstants.WAIT_TIME_EXCEPTION);
@@ -446,15 +453,16 @@ public class HandleService {
      */
     public boolean stop(){
         ThreadConfiguration.THREAD_POOL.shutdown();
-        return true;
+        return RobotConstants.TRUE;
     }
 
     /**
      * 停止当前线程池所有任务
      * @return
      */
-    public void pause(){
+    public boolean pause(){
         RobotConstants.OPERATING_VAR = "pause";
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -521,7 +529,7 @@ public class HandleService {
             cut();
             //结束返回
         }
-        return true;
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -531,7 +539,7 @@ public class HandleService {
     public boolean delete(){
         r.keyPress(KeyEvent.VK_BACK_SPACE);
         r.keyRelease(KeyEvent.VK_BACK_SPACE);
-        return true;
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -543,9 +551,9 @@ public class HandleService {
         Map result = XiaoLiTessract.general(RobotConstants.IMAGE_PATH , text);
         //返回结果为空，则说明没搜到，返回false
         if(result.isEmpty()){
-            return false;
+            return RobotConstants.FALSE;
         }
-        return true;
+        return RobotConstants.TRUE;
     }
 
     /**
@@ -566,7 +574,7 @@ public class HandleService {
             }else if(diff > 0 ){
                 direction = RobotConstants.DOWN;
             }else if(diff == 0){
-                return true;
+                return RobotConstants.TRUE;
             }
             diff = Math.abs(diff);
             //获取到了总共需要移动的像素
@@ -591,10 +599,10 @@ public class HandleService {
                 }
                 step++;
             }
-            return false;
+            return RobotConstants.FALSE;
         }else if(count == currentYear){
-            return true;
+            return RobotConstants.TRUE;
         }
-        return false;
+        return RobotConstants.FALSE;
     }
 }

@@ -150,11 +150,14 @@ public class ParserMain {
             String logicFlag = null;
             while((lineText = br.readLine()) != null){
                 //判断是否为空行，空行跳过
-                if(StringUtils.isEmpty(lineText.trim())){
+                if(StringUtils.isEmpty(lineText.trim()))
                     continue;
-                }
                 //判断是否是注释行,注释行跳过
                 lineText = getNonAnnotated(lineText);
+                //判断是否为空行，空行跳过
+                if(StringUtils.isEmpty(lineText))
+                    continue;
+
                 //如果当前行为逻辑控制语句，则进入
                 if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
                     //逻辑语句封装到list中
@@ -164,8 +167,9 @@ public class ParserMain {
                         map(if-handleName ,  正常参数)、map(elif-handleName ,  正常参数)。
                         其中if-/elif-为固定格式，作为标记
                      */
-                    logicalPackage(lineText , resultList , currentLine );
                     logicFlag = isLogic(lineText);
+                    logicalPackage(lineText , resultList , currentLine ,logicFlag);
+                    currentLine++;
                 }else{
                     //检查脚本每行是否是以分号结尾
                     if(!lineText.endsWith(";")){
@@ -175,6 +179,7 @@ public class ParserMain {
                     currentLine = getCurrentLine(lineText, resultList, currentLine , logicFlag);
                 }
             }
+            System.out.println(currentLine);
         } finally {
             isr.close();
             br.close();
@@ -240,6 +245,29 @@ public class ParserMain {
     }
 
     /**
+     * 获取函数处于的行
+     * 并将拆解开后的函数存入list中
+     * @param lineText      脚本文件中当前行书
+     * @return
+     * @throws SubException
+     */
+    private static Map<String ,String > getHandle(String lineText) throws SubException {
+        String handleName;
+        int strCount;
+        if (StringUtils.isNotEmpty(lineText.trim())){
+            //创建结果map，最终结果处理为Map<String , Object[]>
+            Map result = Maps.newHashMap();
+            //兼容支持在同一行内编辑多个函数，以分号分割
+                //循环取出函数并放入resultList里
+            int index = lineText.indexOf(RobotConstants.PARAM_START_TAG);
+            handleName = lineText.substring(0 , index);
+            result.put(handleName , StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
+            return result;
+        }
+        throw new SubException("判断体中的函数格式有误，请检查是否符合规范");
+    }
+
+    /**
      * 兼容支持在同一行内编辑多个函数，以分号分割
      */
     public static int getFunctionCount(String mainStr,String subStr){
@@ -268,12 +296,23 @@ public class ParserMain {
         //如果不包含括号，则进入以下逻辑
         //因为endif不包含括号，且一行中只可以有endif
         if(!lineText.contains(RobotConstants.PARAM_START_TAG)){
-            if(!lineText.equals(RobotConstants.ENDIF_TAG)){
-                throw new SubException("请检查当前行是否错误，除endif外，其他方法都需加上()，错误行为：" + currentLine);
+            if(!lineText.trim().equals(RobotConstants.ENDIF_TAG) && !lineText.trim().equals(RobotConstants.ELSE_TAG)){
+                throw new SubException("请检查当前行是否错误，除endif与else外，其他方法都需加上()，错误行为：" + currentLine);
+            }else {
+                return true;
+            }
+        }else if(lineText.contains(RobotConstants.PARAM_START_TAG) && StringUtils.isNotEmpty(logicFlag) && logicFlag.equals(RobotConstants.IF_TAG)){
+            //判断字符串是否是if/elif
+            //如果if标签为空，代表当前行脚本是普通函数
+            if(StringUtils.isNotEmpty(isLogic(lineText))){
+                return true;
+            }else {
+                return false;
             }
         }else {
             //判断字符串是否是if/elif
             if(StringUtils.isEmpty(logicFlag))
+                //如果if标签为空，代表当前行脚本是普通函数
                 if(StringUtils.isNotEmpty(isLogic(lineText))){
                     return true;
                 }else {
@@ -295,7 +334,11 @@ public class ParserMain {
      */
     private static String isLogic(String lineText) {
         //如果包含括号，则进入以下逻辑
-        String str = StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG);
+        if(lineText.equals(RobotConstants.ENDIF_TAG))
+            return null;
+        if(lineText.trim().equals(RobotConstants.ELSE_TAG))
+            return RobotConstants.ELSE_TAG;
+        String str = StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim();
         //如果在(之前是if，则认定此语句为if判断语句
         if(str.equals(RobotConstants.IF_TAG)){
             return RobotConstants.IF_TAG;
@@ -306,15 +349,34 @@ public class ParserMain {
     }
 
     /**
+     * 将逻辑标志转换成对应的包装体
+     * @param logicFlag     逻辑标记
+     * @return
+     */
+    private static String changeLogicFlag(String logicFlag) {
+        //如果包含括号，则进入以下逻辑
+        if(StringUtils.isEmpty(logicFlag))
+            return null;
+        if(logicFlag.trim().equals(RobotConstants.ELSE_TAG)) {
+            return RobotConstants.ELSE_TAG_HANDLE;
+        }else if(logicFlag.equals(RobotConstants.IF_TAG)){
+            return RobotConstants.IF_TAG_HANDLE;
+        }else if(logicFlag.equals(RobotConstants.ELIF_TAG)){//将括号中的判断值取出转化为java中的判断语句
+            return RobotConstants.ELIF_TAG_HANDLE;
+        }
+        return null;
+    }
+
+    /**
      * 将if函数封装
      * @param lineText
      */
-    private static void logicalPackage(String lineText , List<Map> upperLayerList , Integer currentLine ) throws SubException {
+    private static void logicalPackage(String lineText , List<Map> upperLayerList , Integer currentLine ,String logicFlag) {
         //首先进行if语句的语法判断
         //if语句的语法为        if(表达式):
         //如果是if语句，则最后以冒号结尾
+        Map result = Maps.newHashMap();
         if (lineText.endsWith(":")) {
-            Map result = Maps.newHashMap();
             //取出括号中的表达式
             String expression = StringUtils.getParamValue(lineText, RobotConstants.PARAM_START_TAG, RobotConstants.PARAM_END_TAG);
             // TODO 判断if中是正常表达式，还是自定义的函数
@@ -325,7 +387,7 @@ public class ParserMain {
 //            if (expression.contains(RobotConstants.PARAM_START_TAG)) {
                 //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
 //                if (parserHandle(expression.substring(0, expression.indexOf(RobotConstants.PARAM_START_TAG)))) {
-                    result.put(RobotConstants.IF_TAG, expression);
+                    result.put(logicFlag, expression);
                     upperLayerList.add(result);
 //                }else {
                     //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
@@ -335,6 +397,9 @@ public class ParserMain {
 //            } else {
 //                throw new SubException("请检查if语句定义是否不符合规范，当前行为:" + currentLine);
 //            }
+        }else{
+            result.put(lineText, null);
+            upperLayerList.add(result);
         }
     }
 
@@ -363,52 +428,121 @@ public class ParserMain {
                 LoggerUtils.warning(ParserMain.class,"程序停止中....\n");
                 break;
             }
+            String logicFlag = null;
+            String currentLogicBody = null;
             for (String handleName : handleMap.keySet()){
-                System.out.println("读取动作 ：" + handleName);
-                //根据handleName进行判断动作是否为定义动作，如果不是则抛出异常
-                //不用try catch捕捉异常，百度搜索更优雅的方法
-                boolean isHandleName = ParserMain.parserHandle(handleName);
                 //拿出和方法名对应的参数个数及参数每个参数的类型.class
                 String values = handleMap.get(handleName);
-                Class [] clazzParams = null;
-                String [] paramArr = null;
-                if(StringUtils.isNotEmpty(values)){
-                    paramArr = values.split(RobotConstants.SPILIT_SYMBOL);
-                    clazzParams = new Class [paramArr.length];
-                    for (int j = 0 ; j < paramArr.length ; j++ ){
-                        clazzParams[j] = paramArr[j].getClass();
-                        //将{{参数}}与excel表中的数据绑定
-                        String param = paramArr[j];
-                        if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)){
-                            //3、在读取操作文件时，将数据与操作文件特定事件的参数做绑定
-//                            System.out.println(param);
-                            LoggerUtils.info(ParserMain.class , param);
-                            //将{{A}}处理成A
-                            paramArr[j] = StringUtils.variableChange(param , dataMap);
-//                            param = StringUtils.getParamValue(param , RobotConstants.VAR_START_TAG , RobotConstants.VAR_END_TAG);
-                            //将{{A}}处理成A
-//                            paramArr[j] = dataMap.get(param);
-                        }
+                System.out.println("读取动作 ：" + handleName);
+                //根据logicFlag判断该走什么逻辑分支
+                currentLogicBody = changeLogicFlag(logicFlag);
+                if(handleName.equals(RobotConstants.ENDIF_TAG))
+                    currentLogicBody = null;
+                //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
+                if(StringUtils.isNotEmpty(currentLogicBody)){
+                    //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
+                    if(handleName.contains(currentLogicBody)){
+                        //将包装体替换
+                        handleName = handleName.replace(currentLogicBody , "");
                     }
                 }
-                //handleName通过后，想办法找到对应的方法，并将参数传入执行。
-                if (isHandleName){
-//                    System.out.println("找到方法 ：" + handleName);
-                    Future<Object> f = ThreadConfiguration.THREAD_POOL.submit(new CallableTask("sample.com.main.controller.HandleController", handleName, paramArr));
-                    try {
-                        System.out.println("调用方法成功返回---"+ f.get());
-                    } catch (InterruptedException e) {
-                        String error = "第" + i + "个函数出错，方法名为" + handleName + "，参数为" + values + "，请参照脚本手册检查。\n";
-                        LoggerUtils.error(ParserMain.class ,error , e);
-                        throw new SubException(error , e);
-                    } catch (ExecutionException e) {
-                        String error = "程序出错，请联系开发人员进行处理。\n";
-                        LoggerUtils.error(ParserMain.class ,error , e);
-                        throw new SubException(error , e);
+
+
+                //如果读取的动作为if/elif则进行一系列处理，然后再放入下一个逻辑
+                if(handleName.equals(RobotConstants.IF_TAG) || handleName.equals(RobotConstants.ELIF_TAG)) {
+                    /*
+                        得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
+                        例如methodA();  则取出methodA判断是否是系统中定义的方法
+                    */
+                    if (values.contains(RobotConstants.PARAM_START_TAG)) {
+                        //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
+                        if (parserHandle(values.substring(0, values.indexOf(RobotConstants.PARAM_START_TAG)))) {
+                            //TODO 调用方法，得知逻辑判断中的数据是否为true
+                            Map<String ,String > subHandleMap = getHandle(values);
+                            for ( String subHandleName : subHandleMap.keySet()){
+                                //获取逻辑体中的表达式结果
+                                boolean invokResult = invokMethod(subHandleMap.get(subHandleName) , subHandleName , dataMap , i);
+                                //判断逻辑体中的表达式结果
+                                if (invokResult){
+                                    logicFlag = handleName;
+                                }
+                            }
+                        } else {
+                            //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
+                            boolean result = ExpressionChanged.isEnable(values, null, null);
+                            //TODO 根据result的值，判断进入哪个逻辑分支
+                            if(result)
+                                logicFlag = handleName;
+                        }
+                    } else if(handleName.equals(RobotConstants.ELSE_TAG) && StringUtils.isEmpty(logicFlag)){
+                        logicFlag = handleName;
+                    } else if(handleName.equals(RobotConstants.ENDIF_TAG)){
+                        logicFlag = null;
+                    } else{
+                        throw new SubException("请检查if语句定义是否不符合规范，错误的函数名为：" + handleName);
                     }
+                } else {
+                    invokMethod(values , handleName , dataMap , i);
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 调用方法
+     * @param params
+     * @param handleName
+     * @param dataMap
+     * @param lineCount
+     * @return
+     * @throws SubException
+     */
+    private static boolean invokMethod(String params , String handleName , Map<String, String> dataMap , int lineCount) throws SubException {
+        //根据handleName进行判断动作是否为定义动作，如果不是则抛出异常
+        //不用try catch捕捉异常，百度搜索更优雅的方法
+        boolean isHandleName = ParserMain.parserHandle(handleName);
+
+//                Class [] clazzParams = null;
+        String [] paramArr = null;
+        if(StringUtils.isNotEmpty(params)){
+            paramArr = params.split(RobotConstants.SPILIT_SYMBOL);
+//                    clazzParams = new Class [paramArr.length];
+            for (int j = 0 ; j < paramArr.length ; j++ ){
+//                        clazzParams[j] = paramArr[j].getClass();
+                //将{{参数}}与excel表中的数据绑定
+                String param = paramArr[j];
+                if(param.contains(RobotConstants.VAR_START_TAG) && param.contains(RobotConstants.VAR_END_TAG)){
+                    //3、在读取操作文件时，将数据与操作文件特定事件的参数做绑定
+//                            System.out.println(param);
+                    LoggerUtils.info(ParserMain.class , param);
+                    //将{{A}}处理成A
+                    paramArr[j] = StringUtils.variableChange(param , dataMap);
+//                            param = StringUtils.getParamValue(param , RobotConstants.VAR_START_TAG , RobotConstants.VAR_END_TAG);
+                    //将{{A}}处理成A
+//                            paramArr[j] = dataMap.get(param);
                 }
             }
         }
+        //handleName通过后，想办法找到对应的方法，并将参数传入执行。
+        if (isHandleName){
+//                    System.out.println("找到方法 ：" + handleName);
+            Future<Object> f = ThreadConfiguration.THREAD_POOL.submit(new CallableTask("sample.com.main.controller.HandleController", handleName, paramArr));
+            try {
+                System.out.println("调用方法成功返回---"+ f.get());
+                return (boolean) f.get();
+            } catch (InterruptedException e) {
+                String error = "第" + lineCount + "个函数出错，方法名为" + handleName + "，参数为" + params + "，请参照脚本手册检查。\n";
+                LoggerUtils.error(ParserMain.class ,error , e);
+                throw new SubException(error , e);
+            } catch (ExecutionException e) {
+                String error = "程序出错，请联系开发人员进行处理。\n";
+                LoggerUtils.error(ParserMain.class ,error , e);
+                throw new SubException(error , e);
+            }
+        }
+        LoggerUtils.info(ParserMain.class , "未找到方法:" + handleName);
+        return RobotConstants.FALSE;
     }
 
     public static void main(String[] args) throws AWTException, IOException, SubException {
