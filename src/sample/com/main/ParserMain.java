@@ -387,7 +387,7 @@ public class ParserMain {
 //            if (expression.contains(RobotConstants.PARAM_START_TAG)) {
                 //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
 //                if (parserHandle(expression.substring(0, expression.indexOf(RobotConstants.PARAM_START_TAG)))) {
-                    result.put(logicFlag, expression);
+                    result.put(logicFlag.trim(), expression);
                     upperLayerList.add(result);
 //                }else {
                     //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
@@ -398,7 +398,7 @@ public class ParserMain {
 //                throw new SubException("请检查if语句定义是否不符合规范，当前行为:" + currentLine);
 //            }
         }else{
-            result.put(lineText, null);
+            result.put(lineText.trim(), null);
             upperLayerList.add(result);
         }
     }
@@ -436,8 +436,11 @@ public class ParserMain {
                 System.out.println("读取动作 ：" + handleName);
                 //根据logicFlag判断该走什么逻辑分支
                 currentLogicBody = changeLogicFlag(logicFlag);
-                if(handleName.equals(RobotConstants.ENDIF_TAG))
-                    currentLogicBody = null;
+                //如果是endif语句则直接跳过，标志着判断语句完结
+                if(handleName.equals(RobotConstants.ENDIF_TAG)) {
+                    logicFlag = null;
+                    continue;
+                }
                 //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
                 if(StringUtils.isNotEmpty(currentLogicBody)){
                     //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
@@ -445,6 +448,12 @@ public class ParserMain {
                         //将包装体替换
                         handleName = handleName.replace(currentLogicBody , "");
                     }
+                }else {
+                    //如果逻辑包装体为空，则判断即将执行的函数是否包含包装体，如包含则略过，因为上一层的逻辑判断结果为false
+                    if(handleName.contains(RobotConstants.IF_TAG_HANDLE)
+                            || handleName.contains(RobotConstants.ELIF_TAG_HANDLE)
+                            || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
+                        continue;
                 }
 
 
@@ -455,8 +464,9 @@ public class ParserMain {
                         例如methodA();  则取出methodA判断是否是系统中定义的方法
                     */
                     if (values.contains(RobotConstants.PARAM_START_TAG)) {
+                        String tempHandleName = values.substring(0, values.indexOf(RobotConstants.PARAM_START_TAG));
                         //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
-                        if (parserHandle(values.substring(0, values.indexOf(RobotConstants.PARAM_START_TAG)))) {
+                        if (parserHandle(tempHandleName)) {
                             //TODO 调用方法，得知逻辑判断中的数据是否为true
                             Map<String ,String > subHandleMap = getHandle(values);
                             for ( String subHandleName : subHandleMap.keySet()){
@@ -468,19 +478,17 @@ public class ParserMain {
                                 }
                             }
                         } else {
-                            //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
-                            boolean result = ExpressionChanged.isEnable(values, null, null);
-                            //TODO 根据result的值，判断进入哪个逻辑分支
-                            if(result)
-                                logicFlag = handleName;
+                            throw new SubException("未找到对应的函数，请仔细检查，错误的函数名为：" + tempHandleName);
                         }
-                    } else if(handleName.equals(RobotConstants.ELSE_TAG) && StringUtils.isEmpty(logicFlag)){
-                        logicFlag = handleName;
-                    } else if(handleName.equals(RobotConstants.ENDIF_TAG)){
-                        logicFlag = null;
                     } else{
-                        throw new SubException("请检查if语句定义是否不符合规范，错误的函数名为：" + handleName);
+                        //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
+                        boolean result = ExpressionChanged.isEnable(values, null, null);
+                        //TODO 根据result的值，判断进入哪个逻辑分支
+                        if(result)
+                            logicFlag = handleName;
                     }
+                } else if(handleName.equals(RobotConstants.ELSE_TAG) && StringUtils.isEmpty(logicFlag)){
+                    logicFlag = handleName;
                 } else {
                     invokMethod(values , handleName , dataMap , i);
                 }

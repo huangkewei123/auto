@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
 import sample.com.main.baidu.utils.Base64Util;
+import sample.com.main.controller.proxy.ProxyFactory;
+import sample.com.main.controller.service.HandleService;
 import sample.com.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -12,24 +14,9 @@ import java.util.Map;
 
 public class Test {
     public static void main(String[] args) throws SubException {
-//        String param = "E:\\文档\\项目资料\\智能机器人\\{{测试层级}}\\测试资料\\{{案码}}{{被告姓名}}";
-        String param = "{{被告姓名22}}";
-        Map dataMap = Maps.newHashMap();
-        dataMap.put("案码","1");
-        dataMap.put("被告姓名","王一博");
-        dataMap.put("测试层级","测试一下");
-
-
-//        param = charCount(param , dataMap);
-//        System.out.println(param);
-
-        int index = param.indexOf("{{");
-        char [] a = param.toCharArray();
-        for (char s : a ) {
-            System.out.println(s);
-        }
 
     }
+
 
     public static List<String> charCount(String str,List<String> list ){
         if(str.contains(RobotConstants.VAR_START_TAG)){

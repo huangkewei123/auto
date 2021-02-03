@@ -233,6 +233,15 @@ public class HandleController {
     }
 
     /**
+     * 需要搜索的文字
+     * @param text      需要搜索的文字
+     * @return
+     */
+    public boolean search(String text) {
+        return proxy.search(text );
+    }
+
+    /**
      * 全选快捷键
      * @return
      */
@@ -247,9 +256,10 @@ public class HandleController {
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-
-
-        h.selectAll();
+        h.cut();
+        boolean a = h.search("搜索");
+        System.out.println(a);
+//        h.selectAll();
 //        h.cut("754" , "154" , "414" , "736");
 //        h.cutPart("0" , "0" , "414" , "736");
 //        h.mouseLocation("确定");
