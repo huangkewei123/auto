@@ -39,18 +39,23 @@ public class XiaoLiTessract {
             //resultList内层嵌套的arrayList
             ArrayList innerList = new ArrayList();
             Map<String , Integer> resultMap = Maps.newHashMap();
-            for (int i = 0 ; i < resultList.size() ; i++) {
-                innerList = (ArrayList)resultList.get(i);
-                LinkedTreeMap tree = (LinkedTreeMap) innerList.get(0);
-                String words = tree.get("words").toString();//解析的中文
-                if(ocrText.equals(words)){
-                    System.out.println("文字匹配成功---->:" + words);
-                    LinkedTreeMap locations = (LinkedTreeMap) tree.get("location");//中文坐标
-                    Integer top = Integer.parseInt(locations.get("left").toString());
-                    Integer left = Integer.parseInt(locations.get("top").toString());
-                    resultMap.put("x",top);
-                    resultMap.put("y",left);
+            try {
+                for (int i = 0 ; i < resultList.size() ; i++) {
+                    innerList = (ArrayList)resultList.get(i);
+                    LinkedTreeMap tree = (LinkedTreeMap) innerList.get(0);
+                    String words = tree.get("words").toString();//解析的中文
+                    if(ocrText.equals(words)){
+                        System.out.println("文字匹配成功---->:" + words);
+                        LinkedTreeMap locations = (LinkedTreeMap) tree.get("location");//中文坐标
+                        Integer top = Integer.parseInt(locations.get("left").toString());
+                        Integer left = Integer.parseInt(locations.get("top").toString());
+                        resultMap.put("x",top);
+                        resultMap.put("y",left);
+                    }
                 }
+            } catch (NullPointerException e) {
+                LoggerUtils.error(XiaoLiTessract.class ,"图片识别结果为空内容，请稍后再试" , e);
+                throw new SubException("图片识别结果为空内容，请稍后再试");
             }
             //存储下解析返回的图片
             String respImgStr = responseMap.get("labeled_img") == null ? null : responseMap.get("labeled_img").toString();
@@ -90,7 +95,7 @@ public class XiaoLiTessract {
 
     public static void main(String[] args) throws AWTException, SubException {
         HandleService.getSingleton().cut();
-        Map a = XiaoLiTessract.general("C:\\image.png", "我111" );
+        Map a = XiaoLiTessract.general("C:\\image.png", "网上缴费" );
         System.out.println(a.isEmpty());
 //        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\微信图片_20210129121416.png");
 //        XiaoLiTessract.imgOcrGetResultStr("C:\\image.png");

@@ -1,20 +1,41 @@
 package sample.test;
 
 import com.google.common.collect.Maps;
+import javafx.application.Platform;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
+import sample.com.main.ParserMain;
 import sample.com.main.baidu.utils.Base64Util;
 import sample.com.main.controller.proxy.ProxyFactory;
 import sample.com.main.controller.service.HandleService;
+import sample.com.utils.LoggerUtils;
 import sample.com.utils.StringUtils;
+import sample.com.utils.excel.ReadExcelUtil;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Test {
     public static void main(String[] args) throws SubException {
-
+        RobotConstants.OPERATING_VAR = "start";
+        try {
+            String dataFieldText = "E:\\文档\\项目资料\\智能机器人\\测试资料\\123.xlsx";
+            //1、读取数据表格
+            ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
+            List<Map<String ,String >> list = readExcelUtil.getObjectsList();
+            //循环excel表格中的所有数据
+            for (Map<String ,String > dataMap : list) {
+                //2、读取脚本文件，并返回脚本集，封为List
+                List<Map> result = ParserMain.readScriptForList("G:\\逻辑脚本.txt");
+                ParserMain.action(dataMap, result);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
     }
 
 

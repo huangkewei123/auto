@@ -10,12 +10,12 @@ public class ExpressionChanged {
 	private static final String UNEQUAL = "!=";
 	private static final String EQUAL = "==";
 	
-	private static Map<String, String> map;
+	private static Map<String, String> maps;
 	private static Map<String, String> params;
     public static boolean isEnable(String enable, Map<String, String> map,
-                            Map<String,String> params){
-    	map = map;
-    	params = params;
+                            Map<String,String> param){
+    	maps = map;
+    	params = param;
         if(StringUtils.isEmpty(enable)){
             return true;
         }
@@ -31,7 +31,7 @@ public class ExpressionChanged {
             }
         }
         operation.add(enable.substring(0,tmpEnd).replaceAll(" ", ""));
-        System.out.println(operation);
+//        System.out.println(operation);
         return judge(operation);
     }
     private static boolean judge(Stack<String> operation) {
@@ -71,10 +71,10 @@ public class ExpressionChanged {
 				String stringOfValue1 = condition.substring(0, index);
 				String stringOfValue2 = condition.substring(index+2,condition.length());
 				
-				Object value1 = getValuFromString(stringOfValue1,params,map);
-				Object value2 = getValuFromString(stringOfValue2,params,map);
-				System.out.println(stringOfValue1+":"+value1);
-				System.out.println(stringOfValue2+":"+value2);
+				Object value1 = getValuFromString(stringOfValue1,params,maps);
+				Object value2 = getValuFromString(stringOfValue2,params,maps);
+//				System.out.println(stringOfValue1+":"+value1);
+//				System.out.println(stringOfValue2+":"+value2);
 				if(value1==null || value2 ==null) {
 					//LOG.error();
 					return false;
@@ -86,10 +86,10 @@ public class ExpressionChanged {
 				String stringOfValue1 = condition.substring(0, index);
 				String stringOfValue2 = condition.substring(index+2,condition.length());
 			
-				Object value1 = getValuFromString(stringOfValue1,params,map);
-				Object value2 = getValuFromString(stringOfValue2,params,map);
-				System.out.println(stringOfValue1+":"+value1);
-				System.out.println(stringOfValue2+":"+value2);
+				Object value1 = getValuFromString(stringOfValue1,params,maps);
+				Object value2 = getValuFromString(stringOfValue2,params,maps);
+//				System.out.println(stringOfValue1+":"+value1);
+//				System.out.println(stringOfValue2+":"+value2);
 				if(value1==null || value2 ==null) {
 					//LOG.error();
 					System.out.println("wrong");
@@ -141,7 +141,7 @@ public class ExpressionChanged {
 //    	String string3 ="params.name == map.id || params.id != true";
 //    	System.out.println(getEnableService.isEnable(string3,map,params));
 
-		String string4 ="1 == 1";
+		String string4 ="false";
 		System.out.println(getEnableService.isEnable(string4,null,null));
     }
  
