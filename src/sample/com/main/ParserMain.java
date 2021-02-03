@@ -409,6 +409,7 @@ public class ParserMain {
     public static void action(Map<String, String> dataMap, List<Map> scriptList) throws SubException {
         Map<String , String > handleMap;
         String logicFlag = null;
+        //因为else没有判断体，用来单独判断是否进入else
         boolean elseFleg = true;
         for (int i = 0; i < scriptList.size(); i++) {
             handleMap = scriptList.get(i);
@@ -438,10 +439,12 @@ public class ParserMain {
                 //如果是endif语句则直接跳过，标志着判断语句完结
                 if(handleName.equals(RobotConstants.ENDIF_TAG)) {
                     logicFlag = null;
+                    elseFleg = true;
                     continue;
                 }
                 //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
                 if(StringUtils.isNotEmpty(currentLogicBody)){
+                    elseFleg = false;
                     //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
                     if(handleName.contains(currentLogicBody)){
                         //将包装体替换
@@ -456,7 +459,7 @@ public class ParserMain {
                             || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
                         continue;
                 }
-                logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, i, logicFlag, handleName, values);
+                logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, i, logicFlag, handleName, values , elseFleg);
 
             }
         }
@@ -464,26 +467,26 @@ public class ParserMain {
 
     /**
      * 根据逻辑标签，选择执行的方法,并返回接下来需要执行的逻辑
-     * @param dataMap
-     * @param scriptLine
-     * @param logicFlag
-     * @param handleName
-     * @param values
+     * @param dataMap       excel中读取的数据
+     * @param scriptLine    脚本当前行
+     * @param logicFlag     逻辑标签
+     * @param handleName    操作名称
+     * @param parameter        参数
      * @return
      * @throws SubException
      */
-    private static String getLogicFlagAndInvokeHandleMethod(Map<String, String> dataMap, int scriptLine, String logicFlag, String handleName, String values) throws SubException {
+    private static String getLogicFlagAndInvokeHandleMethod(Map<String, String> dataMap, int scriptLine, String logicFlag, String handleName, String parameter ,boolean elseFleg ) throws SubException {
         //如果读取的动作为if/elif则进行一系列处理，然后再放入下一个逻辑
         if(handleName.equals(RobotConstants.IF_TAG) || handleName.equals(RobotConstants.ELIF_TAG)) {
             /*
                 得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
                 例如methodA();  则取出methodA判断是否是系统中定义的方法
             */
-            if (values.contains(RobotConstants.PARAM_START_TAG)) {
-                String tempHandleName = values.substring(0, values.indexOf(RobotConstants.PARAM_START_TAG));
+            if (parameter.contains(RobotConstants.PARAM_START_TAG)) {
+                String tempHandleName = parameter.substring(0, parameter.indexOf(RobotConstants.PARAM_START_TAG));
                 //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
                 if (parserHandle(tempHandleName)) {
-                    Map<String ,String > subHandleMap = getHandle(values);
+                    Map<String ,String > subHandleMap = getHandle(parameter);
                     for ( String subHandleName : subHandleMap.keySet()){
                         //获取逻辑体中的表达式结果
                         boolean invokResult = invokMethod(subHandleMap.get(subHandleName) , subHandleName , dataMap, scriptLine);
@@ -497,28 +500,31 @@ public class ParserMain {
                 }
             } else{
                 //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
-                boolean result = ExpressionChanged.isEnable(values, null, null);
-                if(result)
+                boolean result = ExpressionChanged.isEnable(parameter, null, null);
+                if(result) {
                     logicFlag = handleName;
+                }
             }
         } else if(handleName.equals(RobotConstants.ELSE_TAG) ){
-            if(StringUtils.isEmpty(logicFlag)){
-                logicFlag = handleName;
-            }else{
-                logicFlag = null;
-            }
+            //当elseFleg为false时，说明已经有函数进入过if/elif了，此时则不会进入else
+            if(elseFleg)
+                if(StringUtils.isEmpty(logicFlag)){
+                    logicFlag = handleName;
+                }else{
+                    logicFlag = null;
+                }
         } else {
-            invokMethod(values, handleName, dataMap, scriptLine);
+            invokMethod(parameter, handleName, dataMap, scriptLine);
         }
         return logicFlag;
     }
 
     /**
      * 调用方法
-     * @param params
-     * @param handleName
-     * @param dataMap
-     * @param lineCount
+     * @param params           脚本行方法参数
+     * @param handleName       脚本函数名称
+     * @param dataMap          excel数据集
+     * @param lineCount        当前行
      * @return
      * @throws SubException
      */
