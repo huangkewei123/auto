@@ -1,0 +1,24 @@
+//×¢ÊÍ
+//cut();
+if( 1 ==2 ) :
+	if(a == a):
+		inputText(µÚ¶ş²ã);
+	endif
+	inputText(1);
+elif(2 == 2) :
+	inputText(2);
+elif(2 == 3) :
+	inputText(3);
+else 
+	inputText(elseÂß¼­);
+endif
+inputText(½áÊø);
+if( 1 ==g ) :
+	inputText(1);
+elif(2 == a) :
+	inputText(2);
+elif(2 == 4) :
+	inputText(3);
+else 
+	inputText(elseÂß¼­);
+endif
