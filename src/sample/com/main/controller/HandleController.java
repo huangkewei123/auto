@@ -242,6 +242,14 @@ public class HandleController {
     }
 
     /**
+     * 删除
+     * @return
+     */
+    public boolean delete(String count) throws SubException {
+        return proxy.delete(count);
+    }
+
+    /**
      * 全选快捷键
      * @return
      */

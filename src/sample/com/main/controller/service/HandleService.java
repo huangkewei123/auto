@@ -534,11 +534,18 @@ public class HandleService {
 
     /**
      * 删除
+     * @param count 删除几次
      * @return
      */
-    public boolean delete(){
-        r.keyPress(KeyEvent.VK_BACK_SPACE);
-        r.keyRelease(KeyEvent.VK_BACK_SPACE);
+    public boolean delete(String count) throws SubException {
+        if(StringUtils.isEmpty(count)){
+            throw new SubException("delete函数的参数有误，请仔细检查");
+        }
+        int loopCount = Integer.parseInt(count);
+        for (int i = 0 ; i < loopCount ; i++ ){
+            r.keyPress(KeyEvent.VK_BACK_SPACE);
+            r.keyRelease(KeyEvent.VK_BACK_SPACE);
+        }
         return RobotConstants.TRUE;
     }
 

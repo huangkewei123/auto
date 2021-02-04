@@ -22,7 +22,8 @@ public class Test {
     public static void main(String[] args) throws SubException {
         RobotConstants.OPERATING_VAR = "start";
         try {
-            String dataFieldText = "F:\\公司资料\\机器人\\测试资料\\112.xlsx";
+//            String dataFieldText = "F:\\公司资料\\机器人\\测试资料\\112.xlsx";
+            String dataFieldText = "E:\\文档\\项目资料\\智能机器人\\测试资料\\123.xlsx";
             //1、读取数据表格
             ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
             List<Map<String ,String >> list = readExcelUtil.getObjectsList();
@@ -37,7 +38,6 @@ public class Test {
             e.printStackTrace();
         }
     }
-
 
     public static List<String> charCount(String str,List<String> list ){
         if(str.contains(RobotConstants.VAR_START_TAG)){

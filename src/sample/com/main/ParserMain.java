@@ -575,12 +575,13 @@ public class ParserMain {
     }
 
     public static void main(String[] args) throws AWTException, IOException, SubException {
-        List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
+        /*List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
         for ( Map<String ,String > map : list) {
             for (String a : map.keySet()) {
                 System.out.println(a + " -------------- " + map.get(a));
             }
 
-        }
+        }*/
+        
     }
 }
