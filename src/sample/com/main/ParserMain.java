@@ -143,9 +143,7 @@ public class ParserMain {
         try {
             String lineText = null;
             //操作名称
-//        String handleName = null;
             resultList = new ArrayList<Map>();
-//        int strCount = 0;
             int currentLine = 1;
             String logicFlag = null;
             while((lineText = br.readLine()) != null){
@@ -161,12 +159,6 @@ public class ParserMain {
                 //如果当前行为逻辑控制语句，则进入
                 if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
                     //逻辑语句封装到list中
-                    /*
-                        封装规则为：map(if , (表达式))
-                        if/elif下的逻辑块内容则以如下方式封装
-                        map(if-handleName ,  正常参数)、map(elif-handleName ,  正常参数)。
-                        其中if-/elif-为固定格式，作为标记
-                     */
                     logicFlag = isLogic(lineText);
                     logicalPackage(lineText , resultList , currentLine ,logicFlag);
                     currentLine++;
@@ -332,7 +324,7 @@ public class ParserMain {
      */
     private static String isLogic(String lineText) {
         //如果包含括号，则进入以下逻辑
-        if(lineText.equals(RobotConstants.ENDIF_TAG))
+        if(lineText.trim().equals(RobotConstants.ENDIF_TAG))
             return null;
         if(lineText.trim().equals(RobotConstants.ELSE_TAG))
             return RobotConstants.ELSE_TAG;
@@ -382,19 +374,8 @@ public class ParserMain {
                 得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
                 例如methodA();  则取出methodA判断是否是系统中定义的方法
             */
-//            if (expression.contains(RobotConstants.PARAM_START_TAG)) {
-                //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
-//                if (parserHandle(expression.substring(0, expression.indexOf(RobotConstants.PARAM_START_TAG)))) {
-                    result.put(logicFlag.trim(), expression);
-                    upperLayerList.add(result);
-//                }else {
-                    //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
-//                    boolean result = ExpressionChanged.isEnable(expression , null, null);
-//                }
-//                }
-//            } else {
-//                throw new SubException("请检查if语句定义是否不符合规范，当前行为:" + currentLine);
-//            }
+            result.put(logicFlag.trim(), expression);
+            upperLayerList.add(result);
         }else{
             result.put(lineText.trim(), null);
             upperLayerList.add(result);
@@ -575,13 +556,13 @@ public class ParserMain {
     }
 
     public static void main(String[] args) throws AWTException, IOException, SubException {
-        /*List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
+        List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
         for ( Map<String ,String > map : list) {
             for (String a : map.keySet()) {
                 System.out.println(a + " -------------- " + map.get(a));
             }
 
-        }*/
+        }
         
     }
 }

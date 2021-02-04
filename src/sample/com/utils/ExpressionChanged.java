@@ -31,7 +31,7 @@ public class ExpressionChanged {
             }
         }
         operation.add(enable.substring(0,tmpEnd).replaceAll(" ", ""));
-//        System.out.println(operation);
+        System.out.println(operation);
         return judge(operation);
     }
     private static boolean judge(Stack<String> operation) {
@@ -73,8 +73,8 @@ public class ExpressionChanged {
 				
 				Object value1 = getValuFromString(stringOfValue1,params,maps);
 				Object value2 = getValuFromString(stringOfValue2,params,maps);
-//				System.out.println(stringOfValue1+":"+value1);
-//				System.out.println(stringOfValue2+":"+value2);
+				System.out.println(stringOfValue1+":"+value1);
+				System.out.println(stringOfValue2+":"+value2);
 				if(value1==null || value2 ==null) {
 					//LOG.error();
 					return false;
@@ -88,8 +88,8 @@ public class ExpressionChanged {
 			
 				Object value1 = getValuFromString(stringOfValue1,params,maps);
 				Object value2 = getValuFromString(stringOfValue2,params,maps);
-//				System.out.println(stringOfValue1+":"+value1);
-//				System.out.println(stringOfValue2+":"+value2);
+				System.out.println(stringOfValue1+":"+value1);
+				System.out.println(stringOfValue2+":"+value2);
 				if(value1==null || value2 ==null) {
 					//LOG.error();
 					System.out.println("wrong");
@@ -141,7 +141,7 @@ public class ExpressionChanged {
 //    	String string3 ="params.name == map.id || params.id != true";
 //    	System.out.println(getEnableService.isEnable(string3,map,params));
 
-		String string4 ="false";
+		String string4 ="1+1 == 2";
 		System.out.println(getEnableService.isEnable(string4,null,null));
     }
  
