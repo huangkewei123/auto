@@ -1,4 +1,4 @@
-package sample.test;
+package sample.com.constants;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ public class Entity {
     private Integer line;           //行号
     private String handleName;      //函数名称
     private String parameter;       //函数参数
-    private String type;            //函数类型
+    private String type;            //函数类型      if？还是elif？还是else？或者while？normal？
     private String attribution;     //函数归属类型，比如当前待执行的方法归属if？还是elif？还是else？或者while？
     private Integer level;          //层级
     private List<Entity> subList;   //子块

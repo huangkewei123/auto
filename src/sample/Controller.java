@@ -1,5 +1,6 @@
 package sample;
 
+import sample.com.constants.Entity;
 import sample.com.constants.HotKeyConstants;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
@@ -186,7 +187,7 @@ public class Controller implements ControlledStage, Initializable  {
                                 }
                             }
                             //2、读取脚本文件，并返回脚本集，封为List
-                            List<Map> result = ParserMain.readScriptForList(scriptFieldText);
+                            List<Entity> result = ParserMain.readScriptForList(scriptFieldText);
                             Platform.runLater(() -> TextArea.appendText("脚本总共" + result.size() + "行\n"));
                             String execute_excel_line = "正在执行第" + listIndex + "条表格记录\n";
                             Platform.runLater(() -> TextArea.appendText(execute_excel_line));

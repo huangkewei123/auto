@@ -6,15 +6,11 @@ import sample.com.constants.ExceptionConstants;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
 import sample.com.main.baidu.utils.FileUtil;
-import sample.com.main.controller.proxy.ProxyFactory;
 import sample.com.main.controller.service.HandleService;
-import sample.com.utils.ExpressionChanged;
-import sample.com.utils.LoggerUtils;
-import sample.com.utils.ReflectUtil;
-import sample.com.utils.StringUtils;
+import sample.com.utils.*;
 import sample.com.utils.ThreadConinfguration.CallableTask;
 import sample.com.utils.ThreadConinfguration.ThreadConfiguration;
-import sample.com.utils.excel.ReadExcelUtil;
+import sample.com.constants.Entity;
 
 import java.awt.*;
 import java.io.*;
@@ -123,7 +119,7 @@ public class ParserMain {
      * 读取后封装至List<Map<String ,String>>里
      * 其中部分格式需转换，并拆分
      */
-    public static List<Map> readScriptForList(String filePath) throws SubException, IOException {
+    public static List<Entity> readScriptForList(String filePath) throws SubException, IOException {
         File file = new File(filePath);
         if (!file.exists()) {
             LoggerUtils.error(FileUtil.class, ExceptionConstants.PATH_EXISTS + filePath);
@@ -138,11 +134,11 @@ public class ParserMain {
         InputStreamReader isr = new InputStreamReader(fis,"GBK");
         BufferedReader br = new BufferedReader(isr);
         //每行的文字
-        List<Map> resultList;
+
         try {
             String lineText = null;
             //操作名称
-            resultList = new ArrayList<Map>();
+            List<Entity> resultList = new ArrayList<Entity>();
             int currentLine = 1;
             String logicFlag = null;
             while((lineText = br.readLine()) != null){
@@ -286,15 +282,15 @@ public class ParserMain {
         //如果不包含括号，则进入以下逻辑
         //因为endif不包含括号，且一行中只可以有endif
         if(!lineText.contains(RobotConstants.PARAM_START_TAG)){
-            if(!lineText.trim().equals(RobotConstants.ENDIF_TAG) && !lineText.trim().equals(RobotConstants.ELSE_TAG)){
-                throw new SubException("请检查当前行是否错误，除endif与else外，其他方法都需加上()，错误行为：" + currentLine);
+            if(!lineText.trim().equals(RobotConstants.ENDIF_TAG) && !lineText.trim().equals(RobotConstants.ELSE_TAG) && !lineText.trim().equals(RobotConstants.END_WHILE_TAG)){
+                throw new SubException("请检查当前行是否错误，除endif/else/edl外，其他方法都需加上()，错误行为：" + currentLine);
             }else {
                 return true;
             }
-        }else if(lineText.contains(RobotConstants.PARAM_START_TAG) && StringUtils.isNotEmpty(logicFlag) && (logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.ELIF_TAG))){
-            //判断字符串是否是if/elif
+        }else if(lineText.contains(RobotConstants.PARAM_START_TAG) && StringUtils.isNotEmpty(logicFlag) && (logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.ELIF_TAG) || logicFlag.equals(RobotConstants.WHILE_TAG))){
+            //判断字符串是否是if/elif/while
             //如果if标签为空，代表当前行脚本是普通函数
-            if(StringUtils.isNotEmpty(isLogic(lineText))){
+            if(StringUtils.isNotEmpty(LogicUtil.getLogicStr(lineText))){
                 return true;
             }else {
                 return false;
@@ -302,7 +298,7 @@ public class ParserMain {
         }else {
             if(StringUtils.isEmpty(logicFlag))
                 //如果if标签为空，代表当前行脚本是普通函数
-                if(StringUtils.isNotEmpty(isLogic(lineText))){
+                if(StringUtils.isNotEmpty(LogicUtil.getLogicStr(lineText))){
                     return true;
                 }else {
                     return false;
@@ -314,46 +310,6 @@ public class ParserMain {
                 }
         }
         return false;
-    }
-
-    /**
-     * 是否是逻辑语句
-     * @param lineText
-     * @return
-     */
-    private static String isLogic(String lineText) {
-        //如果包含括号，则进入以下逻辑
-        if(lineText.trim().equals(RobotConstants.ENDIF_TAG))
-            return null;
-        if(lineText.trim().equals(RobotConstants.ELSE_TAG))
-            return RobotConstants.ELSE_TAG;
-        String str = StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim();
-        //如果在(之前是if，则认定此语句为if判断语句
-        if(str.equals(RobotConstants.IF_TAG)){
-            return RobotConstants.IF_TAG;
-        }else if(str.equals(RobotConstants.ELIF_TAG)){//将括号中的判断值取出转化为java中的判断语句
-            return RobotConstants.ELIF_TAG;
-        }
-        return null;
-    }
-
-    /**
-     * 将逻辑标志转换成对应的包装体
-     * @param logicFlag     逻辑标记
-     * @return
-     */
-    private static String changeLogicFlag(String logicFlag) {
-        //如果包含括号，则进入以下逻辑
-        if(StringUtils.isEmpty(logicFlag))
-            return null;
-        if(logicFlag.trim().equals(RobotConstants.ELSE_TAG)) {
-            return RobotConstants.ELSE_TAG_HANDLE;
-        }else if(logicFlag.equals(RobotConstants.IF_TAG)){
-            return RobotConstants.IF_TAG_HANDLE;
-        }else if(logicFlag.equals(RobotConstants.ELIF_TAG)){//将括号中的判断值取出转化为java中的判断语句
-            return RobotConstants.ELIF_TAG_HANDLE;
-        }
-        return null;
     }
 
     /**
@@ -386,13 +342,12 @@ public class ParserMain {
      * @param dataMap
      * @param scriptList    脚本集,脚本的所有数据都在list中，list中的map为已被分解的方法名和参数
      */
-    public static void action(Map<String, String> dataMap, List<Map> scriptList) throws SubException {
-        Map<String , String > handleMap;
+    public static void action(Map<String, String> dataMap, List<Entity> scriptList) throws SubException {
         String logicFlag = null;
         //因为else没有判断体，用来单独判断是否进入else
         boolean elseFleg = true;
         for (int i = 0; i < scriptList.size(); i++) {
-            handleMap = scriptList.get(i);
+            Entity handleMap = scriptList.get(i);
             //如果暂停变量为初始值，则可通过，初始值为false
             //点击暂停键后变量修改为true，为true时则死循环作为暂停
             while (RobotConstants.OPERATING_VAR.equals("pause")){
@@ -410,38 +365,31 @@ public class ParserMain {
                 break;
             }
 
-            for (String handleName : handleMap.keySet()){
-                //拿出和方法名对应的参数个数及参数每个参数的类型.class
-                String values = handleMap.get(handleName);
-                System.out.println("读取动作 ：" + handleName);
-                //根据logicFlag判断该走什么逻辑分支
-                String currentLogicBody = changeLogicFlag(logicFlag);
-                //如果是endif语句则直接跳过，标志着判断语句完结
-                if(handleName.equals(RobotConstants.ENDIF_TAG)) {
+            //拿出和方法名对应的参数个数及参数每个参数的类型.class
+            String handleName = handleMap.getHandleName();
+            String values = handleMap.getHandleName();
+            System.out.println("读取动作 ：" + handleName);
+            //如果
+            if()
+            //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
+            if(StringUtils.isNotEmpty(currentLogicBody)){
+                elseFleg = false;
+                //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
+                if(handleName.contains(currentLogicBody)){
+                    //将包装体替换
+                    handleName = handleName.replace(currentLogicBody , "");
+                }else{
                     logicFlag = null;
-                    elseFleg = true;
+                }
+            }else {
+                //如果逻辑包装体为空，则判断即将执行的函数是否包含包装体，如包含则略过，因为上一层的逻辑判断结果为false
+                if(handleName.contains(RobotConstants.IF_TAG_HANDLE)
+                        || handleName.contains(RobotConstants.ELIF_TAG_HANDLE)
+                        || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
                     continue;
-                }
-                //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
-                if(StringUtils.isNotEmpty(currentLogicBody)){
-                    elseFleg = false;
-                    //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
-                    if(handleName.contains(currentLogicBody)){
-                        //将包装体替换
-                        handleName = handleName.replace(currentLogicBody , "");
-                    }else{
-                        logicFlag = null;
-                    }
-                }else {
-                    //如果逻辑包装体为空，则判断即将执行的函数是否包含包装体，如包含则略过，因为上一层的逻辑判断结果为false
-                    if(handleName.contains(RobotConstants.IF_TAG_HANDLE)
-                            || handleName.contains(RobotConstants.ELIF_TAG_HANDLE)
-                            || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
-                        continue;
-                }
-                logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, i, logicFlag, handleName, values , elseFleg);
-
             }
+            logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, i, logicFlag, handleName, values , elseFleg);
+
         }
     }
 
@@ -566,13 +514,13 @@ public class ParserMain {
     }
 
     public static void main(String[] args) throws AWTException, IOException, SubException {
-        List<Map> list = readScriptForList("G:\\逻辑脚本.txt");
-        for ( Map<String ,String > map : list) {
+        List<Entity> list = readScriptForList("G:\\逻辑脚本.txt");
+        /*for ( Map<String ,String > map : list) {
             for (String a : map.keySet()) {
                 System.out.println(a + " -------------- " + map.get(a));
             }
 
-        }
+        }*/
         
     }
 }

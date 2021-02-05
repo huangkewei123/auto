@@ -244,12 +244,12 @@ public class RobotConstants {
 
     public static final String ENDIF_TAG = "endif";
 
-    //-------------------------------------------逻辑体函数
-    public static final String IF_TAG_HANDLE = "if-";
+    public static final String WHILE_TAG = "while";
 
-    public static final String ELIF_TAG_HANDLE = "elif-";
+    public static final String END_WHILE_TAG = "edl";
 
-    public static final String ELSE_TAG_HANDLE = "else-";
+    public static final String NORMAL_TAG = "normal";
+
 
 
 
