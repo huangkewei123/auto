@@ -151,10 +151,20 @@ public class ParserMain {
                 if(StringUtils.isEmpty(lineText))
                     continue;
 
-                //如果当前行为逻辑控制语句，则进入
+                //TODO 首先判断当前行是什么函数
                 if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
                     //逻辑语句封装到list中
-                    logicFlag = isLogic(lineText);
+                    logicFlag = LogicUtil.getLogicStr(lineText);
+                    logicalPackage(lineText , resultList , currentLine ,logicFlag);
+                    currentLine++;
+                }
+
+
+
+                //如果当前行为逻辑控制语句，则进入
+                /*if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
+                    //逻辑语句封装到list中
+                    logicFlag = LogicUtil.getLogicStr(lineText);
                     logicalPackage(lineText , resultList , currentLine ,logicFlag);
                     currentLine++;
                 }else{
@@ -164,7 +174,7 @@ public class ParserMain {
                         throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
                     }
                     currentLine = getCurrentLine(lineText, resultList, currentLine , logicFlag);
-                }
+                }*/
             }
         } finally {
             isr.close();
@@ -201,7 +211,7 @@ public class ParserMain {
      * @return
      * @throws SubException
      */
-    private static int getCurrentLine(String lineText, List<Map> resultList, int currentLine ,String logicFlag)  {
+    private static int getCurrentLine(String lineText, List<Entity> resultList, int currentLine ,String logicFlag)  {
         String handleName;
         int strCount;
         if (StringUtils.isNotEmpty(lineText.trim())){
@@ -272,51 +282,13 @@ public class ParserMain {
         return -1;
     }
 
-    /**
-     * 脚本中的if函数判断
-     * @param lineText      脚本行数据
-     * @param currentLine   当前行数
-     * @return
-     */
-    public static boolean isLogicalJudgment(String lineText,Integer currentLine ,String logicFlag) throws SubException {
-        //如果不包含括号，则进入以下逻辑
-        //因为endif不包含括号，且一行中只可以有endif
-        if(!lineText.contains(RobotConstants.PARAM_START_TAG)){
-            if(!lineText.trim().equals(RobotConstants.ENDIF_TAG) && !lineText.trim().equals(RobotConstants.ELSE_TAG) && !lineText.trim().equals(RobotConstants.END_WHILE_TAG)){
-                throw new SubException("请检查当前行是否错误，除endif/else/edl外，其他方法都需加上()，错误行为：" + currentLine);
-            }else {
-                return true;
-            }
-        }else if(lineText.contains(RobotConstants.PARAM_START_TAG) && StringUtils.isNotEmpty(logicFlag) && (logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.ELIF_TAG) || logicFlag.equals(RobotConstants.WHILE_TAG))){
-            //判断字符串是否是if/elif/while
-            //如果if标签为空，代表当前行脚本是普通函数
-            if(StringUtils.isNotEmpty(LogicUtil.getLogicStr(lineText))){
-                return true;
-            }else {
-                return false;
-            }
-        }else {
-            if(StringUtils.isEmpty(logicFlag))
-                //如果if标签为空，代表当前行脚本是普通函数
-                if(StringUtils.isNotEmpty(LogicUtil.getLogicStr(lineText))){
-                    return true;
-                }else {
-                    return false;
-                }
-            else
-                //检查逻辑体是否符合格式，正确格式必须带有缩进
-                if(!lineText.contains("\t")) {
-                    throw new SubException("请检查当前行是否符合逻辑体规范，逻辑体必须包含缩进，当前行为：第" + currentLine + "行");
-                }
-        }
-        return false;
-    }
+
 
     /**
      * 将if函数封装
      * @param lineText
      */
-    private static void logicalPackage(String lineText , List<Map> upperLayerList , Integer currentLine ,String logicFlag) {
+    private static void logicalPackage(String lineText , List<Entity> upperLayerList , Integer currentLine ,String logicFlag) {
         //首先进行if语句的语法判断
         //if语句的语法为        if(表达式):
         //如果是if语句，则最后以冒号结尾

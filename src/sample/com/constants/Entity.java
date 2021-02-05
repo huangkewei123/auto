@@ -10,10 +10,22 @@ public class Entity {
     private String attribution;     //函数归属类型，比如当前待执行的方法归属if？还是elif？还是else？或者while？
     private Integer level;          //层级
     private List<Entity> subList;   //子块
-    private boolean haveSub;        //是否有下级，可以判断sublist是否为空，但是有个简单的变量取值做判断会更方便，默认值为false
+    private Boolean haveSub;        //是否有下级，可以判断sublist是否为空，但是有个简单的变量取值做判断会更方便，默认值为false
 
     public Entity(){
         this.setHaveSub(false);
+    }
+
+    public Entity(Integer line, String handleName , String parameter , String type , String attribution
+            ,Integer level ,List<Entity> list, Boolean haveSub){
+        this.level = level;
+        this.handleName = handleName;
+        this.line = line;
+        this.parameter = parameter;
+        this.type = type;
+        this.attribution = attribution;
+        this.subList = list;
+        this.haveSub = haveSub;
     }
 
     public String getParameter() {
