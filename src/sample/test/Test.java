@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class Test {
     public static void main(String[] args) throws SubException {
-        RobotConstants.OPERATING_VAR = "start";
+        /*RobotConstants.OPERATING_VAR = "start";
         try {
 //            String dataFieldText = "F:\\公司资料\\机器人\\测试资料\\112.xlsx";
             String dataFieldText = "E:\\文档\\项目资料\\智能机器人\\测试资料\\123.xlsx";
@@ -36,7 +36,9 @@ public class Test {
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
-        }
+        }*/
+
+        test();
     }
 
     public static List<String> charCount(String str,List<String> list ){
@@ -67,8 +69,60 @@ public class Test {
         return str;
     }
 
-    public void test(){
-
+    public static void test(){
+        String a = "if-if-if-if-a";
+        String c = a.replace("if-","");
+        System.out.println(c);
 //        Base64Util.generateImage(a,"image01.png");
     }
+
+    /*public static Map package(){
+        Entity en = new Entity();
+        en.setLevel(1);
+        en.setHandleName("inputText");
+        en.setParameter("测试");
+        en.setLine(1);
+        en.setType("normal");
+
+        List subList = new ArrayList();
+
+        Entity subEn = new Entity();
+        subEn.setLevel(1);
+        subEn.setHandleName("inputText");
+        subEn.setParameter("测试第一层");
+        subEn.setLine(2);
+        subEn.setType("if");
+        subEn.setHaveSub(true);
+        subList.add(subEn);
+
+        Entity subEn = new Entity();
+        subEn.setLevel(1);
+        subEn.setHandleName("inputText");
+        subEn.setParameter("测试第一层");
+        subEn.setLine(2);
+        subEn.setType("if");
+        subEn.setHaveSub(true);
+        subList.add(subEn);
+
+        Entity subEn = new Entity();
+        subEn.setLevel(1);
+        subEn.setHandleName("inputText");
+        subEn.setParameter("测试第一层");
+        subEn.setLine(2);
+        subEn.setType("if");
+        subEn.setHaveSub(true);
+        subList.add(subEn);
+
+
+        Entity en1 = new Entity();
+        en1.setLevel(1);
+        en1.setHandleName("if");
+        en1.setParameter("cut();");
+        en1.setLine(2);
+        en1.setType("if");
+        en1.setHaveSub(true);
+        en1.setSubList(subList);
+
+
+    }*/
 }

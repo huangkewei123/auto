@@ -7,7 +7,7 @@ if( 1 ==2 ) :
 	inputText(1);
 elif(2 == 2) :
 	inputText(2);
-elif(2 == 3) :
+elif(search(ËÑË÷ÎÄ×Ö)) :
 	inputText(3);
 else 
 	inputText(elseÂß¼­);
