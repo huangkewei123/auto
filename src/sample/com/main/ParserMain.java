@@ -37,7 +37,6 @@ public class ParserMain {
      * @return；
      */
     public static boolean parserHandle(String handleName){
-        ReflectUtil.notNull(handleName, "handleName must not be null");
         boolean result = false;
         if (StringUtils.isNotEmpty(handleName)) {
             switch (handleName) {
@@ -510,6 +509,12 @@ public class ParserMain {
      * @throws SubException
      */
     private static boolean invokMethod(String params , String handleName , Map<String, String> dataMap , int lineCount) throws SubException {
+        ReflectUtil.notNull(handleName, "handleName must not be null");
+        boolean isFlip = false;
+        if(handleName.contains("!")){
+            handleName = handleName.replace("!" , "");
+            isFlip = true;
+        }
         //根据handleName进行判断动作是否为定义动作，如果不是则抛出异常
         //不用try catch捕捉异常，百度搜索更优雅的方法
         boolean isHandleName = ParserMain.parserHandle(handleName);
@@ -539,8 +544,13 @@ public class ParserMain {
 //                    System.out.println("找到方法 ：" + handleName);
             Future<Object> f = ThreadConfiguration.THREAD_POOL.submit(new CallableTask("sample.com.main.controller.HandleController", handleName, paramArr));
             try {
-                System.out.println("调用方法成功返回---"+ f.get());
-                return (boolean) f.get();
+                if(isFlip){
+                    System.out.println("调用方法成功返回---"+ !(boolean) f.get());
+                    return !(boolean) f.get();
+                }else{
+                    System.out.println("调用方法成功返回---"+ (boolean) f.get());
+                    return (boolean) f.get();
+                }
             } catch (InterruptedException e) {
                 String error = "第" + lineCount + "个函数出错，方法名为" + handleName + "，参数为" + params + "，请参照脚本手册检查。\n";
                 LoggerUtils.error(ParserMain.class ,error , e);
