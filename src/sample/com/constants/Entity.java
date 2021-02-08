@@ -4,6 +4,7 @@ import java.util.List;
 
 public class Entity {
     private Integer line;           //行号
+    private Integer pline;          //父行号
     private String handleName;      //函数名称
     private String parameter;       //函数参数
     private String type;            //函数类型      if？还是elif？还是else？或者while？normal？
@@ -84,11 +85,34 @@ public class Entity {
         this.attribution = attribution;
     }
 
-    public boolean isHaveSub() {
+    public Boolean getHaveSub() {
         return haveSub;
     }
 
-    public void setHaveSub(boolean haveSub) {
+    public void setHaveSub(Boolean haveSub) {
         this.haveSub = haveSub;
+    }
+
+    public Integer getPline() {
+        return pline;
+    }
+
+    public void setPline(Integer pline) {
+        this.pline = pline;
+    }
+
+    @Override
+    public String toString() {
+        return "Entity{" +
+                "line=" + line +
+                ", pline=" + pline +
+                ", handleName='" + handleName + '\'' +
+                ", parameter='" + parameter + '\'' +
+                ", type='" + type + '\'' +
+                ", attribution='" + attribution + '\'' +
+                ", level=" + level +
+                ", subList=" + subList +
+                ", haveSub=" + haveSub +
+                '}';
     }
 }

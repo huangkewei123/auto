@@ -1,6 +1,9 @@
 package sample.test;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
@@ -37,8 +40,12 @@ public class Test {
             System.out.println(e);
             e.printStackTrace();
         }*/
-
-        test();
+        List<Map> list = new ArrayList<>();
+        for (int i = 0; i < 10 ; i++){
+            test1(i , list , 0 ,i);
+        }
+        Gson g = new Gson();
+        System.out.println(g.toJson(list));
     }
 
     public static List<String> charCount(String str,List<String> list ){
@@ -75,6 +82,38 @@ public class Test {
         System.out.println(c);
 //        Base64Util.generateImage(a,"image01.png");
     }
+
+    public static List<Map> test1(int line , List<Map> list , int pid ,int els){
+        Map map = Maps.newLinkedHashMap();
+        map.put("line" , line);
+        map.put("pid" , pid);
+        if(els == 3 ){
+            list.add(map);
+            return list;
+        }else if(els == 4 ){
+            List<Map> sublist = new ArrayList<>();
+            Map subMap = Maps.newLinkedHashMap();
+            subMap.put("line" , line+1);
+            subMap.put("pid" , pid);
+            sublist.add(subMap);
+            map.put("sublist",test1(line , sublist , line , 10));
+            list.add(map);
+            return list;
+        }else if(els == 10 ){
+            List<Map> sublist = new ArrayList<>();
+            Map subMap = Maps.newLinkedHashMap();
+            subMap.put("line" , line+1);
+            subMap.put("pid" , pid);
+            sublist.add(subMap);
+            map.put("sublist",test1(line , sublist , line , 11));
+            list.add(map);
+            return list;
+        }else{
+            return list;
+        }
+
+    }
+
 
     /*public static Map package(){
         Entity en = new Entity();
