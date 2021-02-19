@@ -1,8 +1,11 @@
 //注释
 //cut();
+
 if( 1 ==2 ) :
+
 	if(a == a):
 		inputText(第二层);
+		gotoLine(33);
 	endif
 	inputText(1);
 elif(2 == 2) :
@@ -13,12 +16,18 @@ else
 	inputText(else逻辑);
 endif
 inputText(结束);
-if( 1 ==g ) :
-	inputText(1);
-elif(2 == a) :
-	inputText(2);
-elif(2 == 4) :
-	inputText(3);
-else 
-	inputText(else逻辑);
-endif
+while( 2== 2):
+    if( 1 ==g ) :
+        inputText(1);
+        if( 1 ==g ) :
+            inputText(1);
+        endif
+    elif(2 == a) :
+        inputText(2);
+    elif(2 == 4) :
+        inputText(3);
+    else
+        inputText(else逻辑);
+    endif
+edl
+inputText(最后一行);

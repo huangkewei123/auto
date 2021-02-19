@@ -5,6 +5,7 @@ import sample.com.exception.SubException;
 import sample.com.main.controller.proxy.ProxyFactory;
 import sample.com.main.controller.service.HandleService;
 import sample.com.utils.LoggerUtils;
+import sample.com.utils.ReflectUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -255,6 +256,15 @@ public class HandleController {
      */
     public boolean selectAll() {
         return proxy.keyPressWithCtrl(KeyEvent.VK_A);
+    }
+
+    /**
+     * 跳转到某行脚本执行
+     * @param line 需要跳转的行
+     * @return
+     */
+    public boolean gotoLine(String line){
+        return proxy.gotoLine(line);
     }
 
     public static void main(String[] args) throws SubException, InterruptedException {

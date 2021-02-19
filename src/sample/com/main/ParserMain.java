@@ -108,6 +108,9 @@ public class ParserMain {
                 case RobotConstants.SEARCH:
                     result = true;
                     break;
+                case RobotConstants.GOTO:
+                    result = true;
+                    break;
             }
             return result;
         }
@@ -134,41 +137,34 @@ public class ParserMain {
         FileInputStream fis = new FileInputStream(file);
         InputStreamReader isr = new InputStreamReader(fis,"GBK");
         BufferedReader br = new BufferedReader(isr);
-        //每行的文字
-        List<Entity> resultList = new ArrayList<Entity>();
+        RobotConstants.resultList.clear();
         try {
-            String lineText = null;
-            //操作名称
-
-            Integer currentLine = 1;
-            String logicFlag = null;
-            Integer pLine = 0;
-            Integer level = 1;
+            String lineText = null;     //读出来的脚本行
+            Integer currentLine = 1;    //当前行
+            String logicFlag = null;    //逻辑标签
+            Integer pLine = 0;          //语句的父层级行号
+            Integer level = 1;          //语句所属层级
             Map<Integer , Integer > level_pid = Maps.newHashMap();
             level_pid.put(1 , 0);
             while((lineText = br.readLine()) != null){
-                //判断是否为空行，空行跳过
-                if(StringUtils.isEmpty(lineText.trim())){
-//                    currentLine++;
-                    continue;
-                }
-
                 //判断是否是注释行,注释行跳过
                 lineText = getNonAnnotated(lineText);
-                //判断是否为空行，空行跳过
-                if(StringUtils.isEmpty(lineText)){
-//                    currentLine++;
-                    continue;
-                }
 
                 lineText = lineText.trim();
                 Entity en = new Entity();
-                //TODO 首先判断当前行是什么函数
-                logicFlag = LogicUtil.getLogicType(lineText);
-                en.setType(logicFlag);
+                en.setType(lineText);
                 en.setLevel(level);
                 en.setPline(pLine);
                 en.setLine(currentLine);
+
+                //判断是否为空行，空行跳过
+                if(lineText.equals(RobotConstants.COMMENT) || lineText.equals(RobotConstants.BLANK_LINE)){
+                    currentLine++;
+                    RobotConstants.resultList.add(en);
+                    continue;
+                }
+                logicFlag = LogicUtil.getLogicType(lineText);
+                en.setType(logicFlag);
 
 //                if(LogicUtil.getLogic(lineText)){
                     //逻辑语句封装到list中
@@ -180,7 +176,7 @@ public class ParserMain {
                         en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
                         en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
 
-                        resultList.add(en);
+                        RobotConstants.resultList.add(en);
                         pLine = currentLine;
                         level = level + 1;
                         level_pid.put(level , pLine);
@@ -190,7 +186,7 @@ public class ParserMain {
                         en.setLevel(level);
 //                        en.setHandleName(logicFlag);
 
-                        resultList.add(en);
+                        RobotConstants.resultList.add(en);
                         level = level - 1;
                     } else if(logicFlag.equals(RobotConstants.ELSE_TAG)){
                         pLine = level_pid.get(level);
@@ -199,7 +195,7 @@ public class ParserMain {
                         en.setHandleName(logicFlag);
 //                        en.setAttribution(logicFlag);
 
-                        resultList.add(en);
+                        RobotConstants.resultList.add(en);
                     }else {
                         en.setHaveSub(RobotConstants.FALSE);
                         pLine = level_pid.get(level);
@@ -208,7 +204,7 @@ public class ParserMain {
                         en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
 //                        en.setAttribution(logicFlag);
 
-                        resultList.add(en);
+                        RobotConstants.resultList.add(en);
                     }
 
 //                    logicalPackage(lineText, resultList, currentLine,logicFlag);
@@ -233,7 +229,7 @@ public class ParserMain {
                     currentLine = getCurrentLine(lineText, resultList, currentLine , logicFlag);
                 }*/
             }
-            for (Entity e : resultList ) {
+            for (Entity e : RobotConstants.resultList ) {
                 System.out.println(e.toString());
             }
         } finally {
@@ -242,7 +238,7 @@ public class ParserMain {
             fis.close();
         }
 
-        return resultList;
+        return RobotConstants.resultList;
     }
 
     /*private static List<Entity> getScriptList(String lineText, List<Entity> resultList, Integer currentLine, Integer level ,String logicFlag ,Integer pLine) {
@@ -277,15 +273,18 @@ public class ParserMain {
     }*/
 
     /**
-     * 注释判断
+     * 注释/空行判断,如果是注释或者空行，则返回对应的类型
      * @param lineText
      * @return
      */
     private static String getNonAnnotated(String lineText) {
+        if(StringUtils.isEmpty(lineText.trim())){
+            return RobotConstants.BLANK_LINE;
+        }
         //两条斜杠代表注释，拿到行数据后首先将斜杠后的字符全部清除
         if(lineText.contains("//")){
             if(lineText.indexOf("//") == 0)
-                return null;
+                return RobotConstants.COMMENT;
             else
                 lineText = lineText.substring(0, lineText.indexOf("//"));
         }

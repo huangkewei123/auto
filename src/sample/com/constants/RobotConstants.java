@@ -3,6 +3,8 @@ package sample.com.constants;
 import sample.com.utils.ThreadConinfguration.Configuration;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RobotConstants {
 
@@ -116,6 +118,10 @@ public class RobotConstants {
      */
     public final static String SEARCH = "search";
 
+    /**
+     * 跳转到脚本某一行函数
+     */
+    public final static String GOTO = "gotoLine";
 
     /**
      * 自动截图的地址，始终只存在一张截图
@@ -235,6 +241,9 @@ public class RobotConstants {
     //用于代理中将毫秒转换成秒的常量
     public static final BigDecimal MS = new BigDecimal("1000");
 
+    //每行的文字
+    public static List<Entity> resultList = new ArrayList<Entity>();
+
     //-------------------------------------------逻辑判断标签
     public static final String IF_TAG = "if";
 
@@ -249,6 +258,16 @@ public class RobotConstants {
     public static final String END_WHILE_TAG = "edl";
 
     public static final String NORMAL_TAG = "normal";
+
+    /**
+     * 空行
+     */
+    public final static String BLANK_LINE = "blankLine";
+
+    /**
+     * 注释
+     */
+    public final static String COMMENT = "comment";
 
 
 

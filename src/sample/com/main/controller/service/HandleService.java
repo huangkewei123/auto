@@ -564,6 +564,17 @@ public class HandleService {
     }
 
     /**
+     * 跳转到某行脚本执行
+     * @param line 需要跳转的行
+     * @return
+     */
+    public boolean gotoLine(String line){
+        ReflectUtil.notNull(line , "参数不能为空");
+        RobotConstants.resultList.get(Integer.parseInt(line) - 1);
+        return RobotConstants.TRUE;
+    }
+
+    /**
      * 循环波动表盘，滚动至目标值
      * @param count            所需判断的年份、月份、日期
      * @param locationMap    所有表盘中值得位置信息
