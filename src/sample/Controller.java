@@ -192,7 +192,7 @@ public class Controller implements ControlledStage, Initializable  {
                             String execute_excel_line = "正在执行第" + listIndex + "条表格记录\n";
                             Platform.runLater(() -> TextArea.appendText(execute_excel_line));
 
-//                            ParserMain.action(dataMap, result);
+                            ParserMain.action(dataMap, result);
                             //显示正在执行第几条记录
                             String execute_excel_line_finish = "第" + listIndex + "条记录执行完毕，正在执行下一条\n";
                             Platform.runLater(() -> TextArea.appendText(execute_excel_line_finish));

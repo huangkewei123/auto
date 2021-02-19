@@ -10,7 +10,7 @@ public class Entity {
     private String type;            //函数类型      if？还是elif？还是else？或者while？normal？
     private String attribution;     //函数归属类型，比如当前待执行的方法归属if？还是elif？还是else？或者while？
     private Integer level;          //层级
-    private List<Entity> subList;   //子块
+//    private List<Entity> subList;   //子块
     private Boolean haveSub;        //是否有下级，可以判断sublist是否为空，但是有个简单的变量取值做判断会更方便，默认值为false
 
     public Entity(){
@@ -25,7 +25,7 @@ public class Entity {
         this.parameter = parameter;
         this.type = type;
         this.attribution = attribution;
-        this.subList = list;
+//        this.subList = list;
         this.haveSub = haveSub;
     }
 
@@ -53,13 +53,13 @@ public class Entity {
         this.level = level;
     }
 
-    public List<Entity> getSubList() {
-        return subList;
-    }
-
-    public void setSubList(List<Entity> subList) {
-        this.subList = subList;
-    }
+//    public List<Entity> getSubList() {
+//        return subList;
+//    }
+//
+//    public void setSubList(List<Entity> subList) {
+//        this.subList = subList;
+//    }
 
     public Integer getLine() {
         return line;
@@ -111,7 +111,7 @@ public class Entity {
                 ", type='" + type + '\'' +
                 ", attribution='" + attribution + '\'' +
                 ", level=" + level +
-                ", subList=" + subList +
+//                ", subList=" + subList +
                 ", haveSub=" + haveSub +
                 '}';
     }

@@ -1,5 +1,6 @@
 package sample.com.main.controller.service;
 
+import sample.com.constants.Entity;
 import sample.com.constants.ExceptionConstants;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
@@ -570,7 +571,9 @@ public class HandleService {
      */
     public boolean gotoLine(String line){
         ReflectUtil.notNull(line , "参数不能为空");
-        RobotConstants.resultList.get(Integer.parseInt(line) - 1);
+        //获取参数中需要执行的脚本行
+        Entity entity = RobotConstants.resultList.get(Integer.parseInt(line) - 1);
+        //TODO
         return RobotConstants.TRUE;
     }
 

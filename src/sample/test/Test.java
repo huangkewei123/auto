@@ -40,12 +40,14 @@ public class Test {
             System.out.println(e);
             e.printStackTrace();
         }*/
-        List<Map> list = new ArrayList<>();
+        /*List<Map> list = new ArrayList<>();
         for (int i = 0; i < 10 ; i++){
             test1(i , list , 0 ,i);
         }
         Gson g = new Gson();
-        System.out.println(g.toJson(list));
+        System.out.println(g.toJson(list));*/
+
+        testIf();
     }
 
     public static List<String> charCount(String str,List<String> list ){
@@ -112,6 +114,16 @@ public class Test {
             return list;
         }
 
+    }
+
+    public static void testIf(){
+        if(1==1){
+            System.out.println(1);
+        }else if(2==2){
+            System.out.println(2);
+        }else{
+            System.out.println(3);
+        }
     }
 
 

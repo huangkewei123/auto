@@ -166,72 +166,42 @@ public class ParserMain {
                 logicFlag = LogicUtil.getLogicType(lineText);
                 en.setType(logicFlag);
 
-//                if(LogicUtil.getLogic(lineText)){
-                    //逻辑语句封装到list中
-                    if(logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.WHILE_TAG)){
-                        List<Entity> subList = new ArrayList<>();
-                        en.setAttribution(logicFlag);
-                        en.setHaveSub(RobotConstants.TRUE);
-                        en.setSubList(subList);
-                        en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
-                        en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
+                //逻辑语句封装到list中
+                if(logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.WHILE_TAG)){
+                    en.setAttribution(logicFlag);
+                    en.setHaveSub(RobotConstants.TRUE);
+                    en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
+                    en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
 
-                        RobotConstants.resultList.add(en);
-                        pLine = currentLine;
-                        level = level + 1;
-                        level_pid.put(level , pLine);
-                    } else if(logicFlag.equals(RobotConstants.ENDIF_TAG) || logicFlag.equals(RobotConstants.END_WHILE_TAG)){
-                        pLine = level_pid.get(level);
-                        en.setPline(pLine);
-                        en.setLevel(level);
-//                        en.setHandleName(logicFlag);
-
-                        RobotConstants.resultList.add(en);
-                        level = level - 1;
-                    } else if(logicFlag.equals(RobotConstants.ELSE_TAG)){
-                        pLine = level_pid.get(level);
-                        en.setPline(pLine);
-                        en.setLevel(level);
-                        en.setHandleName(logicFlag);
-//                        en.setAttribution(logicFlag);
-
-                        RobotConstants.resultList.add(en);
-                    }else {
-                        en.setHaveSub(RobotConstants.FALSE);
-                        pLine = level_pid.get(level);
-                        en.setPline(pLine);
-                        en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
-                        en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
-//                        en.setAttribution(logicFlag);
-
-                        RobotConstants.resultList.add(en);
-                    }
-
-//                    logicalPackage(lineText, resultList, currentLine,logicFlag);
-                    currentLine++;
-//                }
-
-//                currentLine = getScriptList(lineText, resultList, currentLine, level , logicFlag , 0);
-
-
-                //如果当前行为逻辑控制语句，则进入
-                /*if(isLogicalJudgment(lineText , currentLine ,logicFlag)){
-                    //逻辑语句封装到list中
-                    logicFlag = LogicUtil.getLogicStr(lineText);
-                    logicalPackage(lineText , resultList , currentLine ,logicFlag);
-                    currentLine++;
-                }else{
-                    //检查脚本每行是否是以分号结尾
-                    if(!lineText.endsWith(";")){
-                        LoggerUtils.error(FileUtil.class , "当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-                        throw new SubException("当前行：" + currentLine + "，" + ExceptionConstants.LAST_CHART_SEMICOLON);
-                    }
-                    currentLine = getCurrentLine(lineText, resultList, currentLine , logicFlag);
-                }*/
+                    RobotConstants.resultList.add(en);
+                    pLine = currentLine;
+                    level = level + 1;
+                    level_pid.put(level , pLine);
+                } else if(logicFlag.equals(RobotConstants.ENDIF_TAG) || logicFlag.equals(RobotConstants.END_WHILE_TAG)){
+                    pLine = level_pid.get(level);
+                    en.setPline(pLine);
+                    en.setLevel(level);
+                    RobotConstants.resultList.add(en);
+                    level = level - 1;
+                } else if(logicFlag.equals(RobotConstants.ELSE_TAG)){
+                    pLine = level_pid.get(level);
+                    en.setPline(pLine);
+                    en.setLevel(level);
+                    en.setHandleName(logicFlag);
+                    RobotConstants.resultList.add(en);
+                }else {
+                    en.setHaveSub(RobotConstants.FALSE);
+                    pLine = level_pid.get(level);
+                    en.setPline(pLine);
+                    en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
+                    en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
+                    RobotConstants.resultList.add(en);
+                }
+                currentLine++;
             }
-            for (Entity e : RobotConstants.resultList ) {
-                System.out.println(e.toString());
-            }
+//            for (Entity e : RobotConstants.resultList ) {
+//                System.out.println(e.toString());
+//            }
         } finally {
             isr.close();
             br.close();
@@ -400,16 +370,19 @@ public class ParserMain {
     }*/
 
     /**
-     *
+     * 脚本执行方法
      * @param dataMap
      * @param scriptList    脚本集,脚本的所有数据都在list中，list中的map为已被分解的方法名和参数
      */
-    /*public static void action(Map<String, String> dataMap, List<Entity> scriptList) throws SubException {
+    public static void action(Map<String, String> dataMap, List<Entity> scriptList) throws SubException {
         String logicFlag = null;
         //因为else没有判断体，用来单独判断是否进入else
         boolean elseFleg = true;
-        for (int i = 0; i < scriptList.size(); i++) {
-            Entity handleMap = scriptList.get(i);
+        //行数
+        int line = 0;
+        while (line < scriptList.size()) {
+            Entity handleEntity = scriptList.get(line);
+            String type = handleEntity.getType();
             //如果暂停变量为初始值，则可通过，初始值为false
             //点击暂停键后变量修改为true，为true时则死循环作为暂停
             while (RobotConstants.OPERATING_VAR.equals("pause")){
@@ -427,15 +400,33 @@ public class ParserMain {
                 break;
             }
 
+            //跳过空行和注释行
+            if(type.equals(RobotConstants.BLANK_LINE)
+                    || type.equals(RobotConstants.COMMENT)){
+                line++;
+                continue;
+            }
+
+            //如果类型为nomal，并且方法名为gotoLine则取出相关参数，跳转到相应行执行
+            String handleName = handleEntity.getHandleName();
+            if(type.equals(RobotConstants.NORMAL_TAG) && handleName.equals(RobotConstants.GOTO)){
+                try {
+                    line = Integer.parseInt(handleEntity.getParameter()) - 1;
+                    continue;
+                } catch (NumberFormatException e) {
+                    LoggerUtils.error(ParserMain.class, "gotoLine方法的参数有误，参数只允许为数字", e);
+                    throw new SubException("gotoLine方法的参数有误，参数只允许为数字");
+                }
+            }
             //拿出和方法名对应的参数个数及参数每个参数的类型.class
-            String handleName = handleMap.getHandleName();
-            String values = handleMap.getHandleName();
             System.out.println("读取动作 ：" + handleName);
+            logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, handleEntity);
+            line++;
             //判断当前属于什么函数
-            LogicUtil.getLogicStr(handleName);
-            if()
+//            LogicUtil.getLogicStr(handleName);
+//            if()
             //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
-            if(StringUtils.isNotEmpty(currentLogicBody)){
+            /*if(StringUtils.isNotEmpty(currentLogicBody)){
                 elseFleg = false;
                 //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
                 if(handleName.contains(currentLogicBody)){
@@ -450,23 +441,23 @@ public class ParserMain {
                         || handleName.contains(RobotConstants.ELIF_TAG_HANDLE)
                         || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
                     continue;
-            }
-            logicFlag = getLogicFlagAndInvokeHandleMethod(dataMap, i, logicFlag, handleName, values , elseFleg);
-
+            }*/
         }
-    }*/
+    }
 
     /**
      * 根据逻辑标签，选择执行的方法,并返回接下来需要执行的逻辑
      * @param dataMap       excel中读取的数据
-     * @param scriptLine    脚本当前行
-     * @param logicFlag     逻辑标签
-     * @param handleName    操作名称
-     * @param parameter        参数
+     * @param handleEntity    脚本当前行
+//     * @param logicFlag     逻辑标签
+//     * @param handleName    操作名称
+//     * @param parameter        参数
      * @return
      * @throws SubException
      */
-    private static String getLogicFlagAndInvokeHandleMethod(Map<String, String> dataMap, int scriptLine, String logicFlag, String handleName, String parameter ,boolean elseFleg ) throws SubException {
+    private static String getLogicFlagAndInvokeHandleMethod(Map<String, String> dataMap, Entity handleEntity ) throws SubException {
+        String handleName = handleEntity.getHandleName();
+        String parameter = handleEntity.getParameter();
         //如果读取的动作为if/elif则进行一系列处理，然后再放入下一个逻辑
         if(handleName.equals(RobotConstants.IF_TAG) || handleName.equals(RobotConstants.ELIF_TAG)) {
             /*
