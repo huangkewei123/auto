@@ -180,9 +180,10 @@ public class ParserMain {
                 } else if(logicFlag.equals(RobotConstants.ENDIF_TAG) || logicFlag.equals(RobotConstants.END_WHILE_TAG)){
                     pLine = level_pid.get(level);
                     en.setPline(pLine);
-                    en.setLevel(level);
-                    RobotConstants.resultList.add(en);
                     level = level - 1;
+                    en.setLevel(level);
+                    level_pid.put(level , pLine);
+                    RobotConstants.resultList.add(en);
                 } else if(logicFlag.equals(RobotConstants.ELSE_TAG)){
                     pLine = level_pid.get(level);
                     en.setPline(pLine);
@@ -196,6 +197,9 @@ public class ParserMain {
                     en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
                     en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
                     RobotConstants.resultList.add(en);
+                    pLine = currentLine;
+                    level = level + 1;
+                    level_pid.put(level , pLine);
                 }else{
                     en.setHaveSub(RobotConstants.FALSE);
                     pLine = level_pid.get(level);
