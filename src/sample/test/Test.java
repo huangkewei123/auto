@@ -119,6 +119,9 @@ public class Test {
     public static void testIf(){
         if(1==1){
             System.out.println(1);
+            if(3==3){
+                System.out.println("1==>2层");
+            }
         }else if(2==2){
             System.out.println(2);
         }else{
