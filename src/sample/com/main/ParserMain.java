@@ -142,21 +142,23 @@ public class ParserMain {
             String lineText = null;     //读出来的脚本行
             Integer currentLine = 1;    //当前行
             String logicFlag = null;    //逻辑标签
-            Integer pLine = 0;          //语句的父层级行号
+            Integer pLine = 0;
+            Integer rootLine = 0;          //语句的父层级行号
             Integer level = 1;          //语句所属层级
-            Map<Integer , Integer > level_pid = Maps.newHashMap();
-            level_pid.put(1 , 0);
+            Map<Integer , Integer > level_root_id = Maps.newHashMap();      //用于根层级map
+            level_root_id.put(1 , 0);
             while((lineText = br.readLine()) != null){
                 //判断是否是注释行,注释行跳过
+                lineText = lineText.trim();
                 lineText = getNonAnnotated(lineText);
 
-                lineText = lineText.trim();
                 Entity en = new Entity();
                 en.setType(lineText);
                 en.setLevel(level);
                 en.setPline(pLine);
+                en.setBlockRootLine(rootLine);
                 en.setLine(currentLine);
-
+                System.out.println("当前行数" + currentLine);
                 //判断是否为空行，空行跳过
                 if(lineText.equals(RobotConstants.COMMENT) || lineText.equals(RobotConstants.BLANK_LINE)){
                     currentLine++;
@@ -172,38 +174,33 @@ public class ParserMain {
                     en.setHaveSub(RobotConstants.TRUE);
                     en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
                     en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
-
                     RobotConstants.resultList.add(en);
-                    pLine = currentLine;
+                    rootLine = currentLine;
                     level = level + 1;
-                    level_pid.put(level , pLine);
+                    level_root_id.put(level , rootLine);
                 } else if(logicFlag.equals(RobotConstants.ENDIF_TAG) || logicFlag.equals(RobotConstants.END_WHILE_TAG)){
-                    pLine = level_pid.get(level);
-                    en.setPline(pLine);
-                    level = level - 1;
+                    rootLine = level_root_id.get(level);
+                    en.setBlockRootLine(rootLine);
                     en.setLevel(level);
-                    level_pid.put(level , pLine);
                     RobotConstants.resultList.add(en);
+                    level = level - 1;
                 } else if(logicFlag.equals(RobotConstants.ELSE_TAG)){
-                    pLine = level_pid.get(level);
-                    en.setPline(pLine);
+                    rootLine = level_root_id.get(level);
+                    en.setBlockRootLine(rootLine);
                     en.setLevel(level);
                     en.setHandleName(logicFlag);
                     RobotConstants.resultList.add(en);
-                }else if(logicFlag.equals(RobotConstants.ELIF_TAG)){
+                }else if(logicFlag.equals(RobotConstants.ENDIF_TAG)) {
                     en.setHaveSub(RobotConstants.TRUE);
-                    pLine = level_pid.get(level);
-                    en.setPline(pLine);
+                    rootLine = level_root_id.get(level);
+                    en.setBlockRootLine(rootLine);
                     en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
                     en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
                     RobotConstants.resultList.add(en);
-                    pLine = currentLine;
-                    level = level + 1;
-                    level_pid.put(level , pLine);
-                }else{
+                }else {
                     en.setHaveSub(RobotConstants.FALSE);
-                    pLine = level_pid.get(level);
-                    en.setPline(pLine);
+                    rootLine = level_root_id.get(level);
+                    en.setBlockRootLine(rootLine);
                     en.setHandleName(StringUtils.subStartTagBefore(lineText, RobotConstants.PARAM_START_TAG).trim());
                     en.setParameter(StringUtils.getParamValue(lineText , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG).trim());
                     RobotConstants.resultList.add(en);
@@ -390,7 +387,8 @@ public class ParserMain {
         boolean elseFleg = true;
         //行数
         int line = 0;
-        Map<Integer ,Boolean> flagMap = Maps.newHashMap();
+        Map<Integer ,String> flagMap = Maps.newHashMap();
+        flagMap.put(0,"into");
         while (line < scriptList.size()) {
             Entity handleEntity = scriptList.get(line);
             String type = handleEntity.getType();
@@ -431,7 +429,7 @@ public class ParserMain {
             }
             //拿出和方法名对应的参数个数及参数每个参数的类型.class
             System.out.println("读取动作 ：" + handleName);
-            flagMap = getLogicFlagAndInvokeHandleMethod(flagMap , dataMap, handleEntity);
+            getLogicFlagAndInvokeHandleMethod(flagMap , dataMap, handleEntity);
             line++;
             //判断当前属于什么函数
 //            LogicUtil.getLogicStr(handleName);
@@ -466,60 +464,82 @@ public class ParserMain {
      * @return
      * @throws SubException
      */
-    private static Map<Integer , Boolean > getLogicFlagAndInvokeHandleMethod(Map<Integer , Boolean > flagMap , Map<String, String> dataMap, Entity handleEntity ) throws SubException {
-        String handleName = handleEntity.getHandleName();
+    private static void getLogicFlagAndInvokeHandleMethod(Map<Integer , String > flagMap , Map<String, String> dataMap, Entity handleEntity ) throws SubException {
         String parameter = handleEntity.getParameter();
         String type = handleEntity.getType();
-        boolean logicFlag = false;
-        Integer pline = 0;
+        Integer blockRootLine = handleEntity.getBlockRootLine();
+        String flag = flagMap.get(blockRootLine);
         //如果读取的动作为if/elif则进行一系列处理，然后再放入下一个逻辑
-        if(type.equals(RobotConstants.IF_TAG) || type.equals(RobotConstants.ELIF_TAG) || type.equals(RobotConstants.WHILE_TAG)) {
-            //当type为elif的时候，查看是否进入过之前的判断体，如果进入过，那么flagMap中会有相应的值
-            if(type.equals(RobotConstants.ELIF_TAG)){
-                Boolean isContinue = flagMap.get(handleEntity.getPline());
-                if(isContinue)
-                    return flagMap;
-            }
-            /*得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
-            例如methodA();  则取出methodA判断是否是系统中定义的方法*/
-            if (parameter.contains(RobotConstants.PARAM_START_TAG)) {
-                String tempHandleName = parameter.substring(0, parameter.indexOf(RobotConstants.PARAM_START_TAG));
-                //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
-                if (parserHandle(tempHandleName)) {
-                    Map<String ,String > subHandleMap = getHandle(parameter);
-                    for ( String subHandleName : subHandleMap.keySet()){
-                        //获取逻辑体中的表达式结果
-                        boolean invokResult = invokMethod(subHandleName , subHandleMap.get(subHandleName) , handleEntity.getLine() , dataMap);
-                        //判断逻辑体中的表达式结果
-                        if (invokResult){
-                            if(type.equals(RobotConstants.IF_TAG) || type.equals(RobotConstants.WHILE_TAG))
-                                flagMap.put(handleEntity.getLine() , true);
-                            else
-                                flagMap.put(handleEntity.getPline() , true);
-                        }
-                    }
-                } else {
-                    throw new SubException("未找到对应的函数，请仔细检查，错误的函数名为：" + tempHandleName);
+        if(type.equals(RobotConstants.IF_TAG) || type.equals(RobotConstants.ELIF_TAG) || type.equals(RobotConstants.WHILE_TAG) || type.equals(RobotConstants.ELSE_TAG)) {
+            if(type.equals(RobotConstants.IF_TAG) || type.equals(RobotConstants.WHILE_TAG)){
+                if(flag.equals(RobotConstants.INTO)){
+                    String result = invokeIfElse( dataMap, handleEntity, parameter);
+                    flagMap.put(handleEntity.getLine() , result);
+                }else if(flag.equals(RobotConstants.TEMP_FALSE)){
+                    flagMap.put(handleEntity.getLine() , RobotConstants.IGNORE);
+                }else if(flag.equals(RobotConstants.IGNORE)){
+                    flagMap.put(handleEntity.getLine() , RobotConstants.IGNORE);
                 }
-            } else{
-                //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
-                boolean result = ExpressionChanged.isEnable(parameter, null, null);
-                if(result) {
-                    if(type.equals(RobotConstants.IF_TAG) || type.equals(RobotConstants.WHILE_TAG))
-                        flagMap.put(handleEntity.getLine() , true);
-                    else
-                        flagMap.put(handleEntity.getPline() , true);
+            }else if(type.equals(RobotConstants.ELIF_TAG)){
+                if(flag.equals(RobotConstants.INTO)){
+                    flagMap.put(handleEntity.getBlockRootLine() , RobotConstants.IGNORE);
+                }else if(flag.equals(RobotConstants.TEMP_FALSE)){
+                    String result = invokeIfElse(dataMap, handleEntity, parameter);
+                    flagMap.put(handleEntity.getBlockRootLine() , result);
+                }else if(flag.equals(RobotConstants.IGNORE)){
+                    flagMap.put(handleEntity.getBlockRootLine() , RobotConstants.IGNORE);
+                }
+            }else{
+                if(flag.equals(RobotConstants.IGNORE)){
+                    flagMap.put(handleEntity.getBlockRootLine() , RobotConstants.IGNORE);
+                }else if(flag.equals(RobotConstants.TEMP_FALSE)){
+                    flagMap.put(handleEntity.getBlockRootLine() , RobotConstants.INTO);
+                }else{
+                    flagMap.put(handleEntity.getBlockRootLine() , RobotConstants.IGNORE);
                 }
             }
-        } else if(type.equals(RobotConstants.ELSE_TAG) ){
-            //当elseFleg为false时，说明已经有函数进入过if/elif了，此时则不会进入else
-            Boolean isContinue = flagMap.get(handleEntity.getPline());
-            if(isContinue)
-                return flagMap;
         } else if(type.equals(RobotConstants.NORMAL_TAG)) {
-            invokMethod(handleEntity.getHandleName() , handleEntity.getParameter(), handleEntity.getLine(), dataMap);
+            if(blockRootLine==0)
+                invokMethod(handleEntity.getHandleName() , handleEntity.getParameter(), handleEntity.getLine(), dataMap);
+            if(blockRootLine!=0 && flag.equals(RobotConstants.INTO)){
+                invokMethod(handleEntity.getHandleName() , handleEntity.getParameter(), handleEntity.getLine(), dataMap);
+            }
         }
-        return flagMap;
+    }
+
+    /**
+     * 返回表达式中的true或false
+     * @param dataMap
+     * @param handleEntity
+     * @param parameter
+     * @return
+     * @throws SubException
+     */
+    private static String invokeIfElse(Map<String, String> dataMap, Entity handleEntity, String parameter) throws SubException {
+        boolean result = false;
+        /*得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
+        例如methodA();  则取出methodA判断是否是系统中定义的方法*/
+        if (parameter.contains(RobotConstants.PARAM_START_TAG)) {
+            String tempHandleName = parameter.substring(0, parameter.indexOf(RobotConstants.PARAM_START_TAG));
+            //methodA是否是方法，不是则用正常判断表达式的值，如是，则调用方法，返回调用结果值
+            if (parserHandle(tempHandleName)) {
+                Map<String ,String > subHandleMap = getHandle(parameter);
+                for ( String subHandleName : subHandleMap.keySet()){
+                    //获取逻辑体中的表达式结果
+                    result = invokMethod(subHandleName , subHandleMap.get(subHandleName) , handleEntity.getLine() , dataMap);
+                }
+            } else {
+                throw new SubException("未找到对应的函数，请仔细检查，错误的函数名为：" + tempHandleName);
+            }
+        } else{
+            //当if中为寻常表达式时，使用正常的方法获取表达式对比后的布尔值
+            result = ExpressionChanged.isEnable(parameter, null, null);
+        }
+
+        if(result==true)
+            return RobotConstants.INTO;
+        else
+            return RobotConstants.TEMP_FALSE;
     }
 
     /**

@@ -270,6 +270,13 @@ public class RobotConstants {
     public final static String COMMENT = "comment";
 
 
+    public final static String INTO = "into";
+
+    public final static String IGNORE = "ignore";
+
+    public final static String TEMP_FALSE = "tempFalse";
+
+
 
 
 }

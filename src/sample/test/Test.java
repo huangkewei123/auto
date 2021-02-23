@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
+import sample.com.constants.Entity;
 import sample.com.constants.RobotConstants;
 import sample.com.exception.SubException;
 import sample.com.main.ParserMain;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 public class Test {
     public static void main(String[] args) throws SubException {
-        /*RobotConstants.OPERATING_VAR = "start";
+        RobotConstants.OPERATING_VAR = "start";
         try {
 //            String dataFieldText = "F:\\公司资料\\机器人\\测试资料\\112.xlsx";
             String dataFieldText = "E:\\文档\\项目资料\\智能机器人\\测试资料\\123.xlsx";
@@ -33,21 +34,21 @@ public class Test {
             //循环excel表格中的所有数据
             for (Map<String ,String > dataMap : list) {
                 //2、读取脚本文件，并返回脚本集，封为List
-                List<Map> result = ParserMain.readScriptForList("G:\\逻辑脚本.txt");
+                List<Entity> result = ParserMain.readScriptForList("G:\\逻辑脚本.txt");
                 ParserMain.action(dataMap, result);
             }
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
-        }*/
-        /*List<Map> list = new ArrayList<>();
-        for (int i = 0; i < 10 ; i++){
-            test1(i , list , 0 ,i);
         }
-        Gson g = new Gson();
-        System.out.println(g.toJson(list));*/
+//        List<Map> list = new ArrayList<>();
+//        for (int i = 0; i < 10 ; i++){
+//            test1(i , list , 0 ,i);
+//        }
+//        Gson g = new Gson();
+//        System.out.println(g.toJson(list));
 
-        testIf();
+//        testIf();
     }
 
     public static List<String> charCount(String str,List<String> list ){
