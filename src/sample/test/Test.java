@@ -31,11 +31,19 @@ public class Test {
             //1、读取数据表格
             ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
             List<Map<String ,String >> list = readExcelUtil.getObjectsList();
+            int dataCount = list.size();
+            int currentDataLine = 4;
+            if(dataCount < currentDataLine)
+                throw new SubException("没有足够多的数据");
+
             //循环excel表格中的所有数据
-            for (Map<String ,String > dataMap : list) {
+            int i = currentDataLine;
+            while (i <= dataCount) {
+                Map<String ,String > dataMap = list.get(i);
                 //2、读取脚本文件，并返回脚本集，封为List
-                List<Entity> result = ParserMain.readScriptForList("G:\\逻辑脚本.txt");
+                List<Entity> result = ParserMain.readScriptForList("G:\\逻辑脚本简单测试.txt");
                 ParserMain.action(dataMap, result);
+                i++;
             }
         } catch (Exception e) {
             System.out.println(e);

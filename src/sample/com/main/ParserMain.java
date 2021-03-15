@@ -120,7 +120,7 @@ public class ParserMain {
 
     /**
      * 读取脚本文件
-     * 读取后封装至List<Map<String ,String>>里
+     * 读取后封装至List<Entity>里
      * 其中部分格式需转换，并拆分
      */
     public static List<Entity> readScriptForList(String filePath) throws SubException, IOException {
@@ -158,7 +158,7 @@ public class ParserMain {
                 en.setPline(pLine);
                 en.setBlockRootLine(rootLine);
                 en.setLine(currentLine);
-                System.out.println("当前行数" + currentLine);
+//                System.out.println("当前行数" + currentLine);
                 //判断是否为空行，空行跳过
                 if(lineText.equals(RobotConstants.COMMENT) || lineText.equals(RobotConstants.BLANK_LINE)){
                     currentLine++;
@@ -207,9 +207,9 @@ public class ParserMain {
                 }
                 currentLine++;
             }
-            for (Entity e : RobotConstants.resultList ) {
-                System.out.println(e.toString());
-            }
+//            for (Entity e : RobotConstants.resultList ) {
+//                System.out.println(e.toString());
+//            }
         } finally {
             isr.close();
             br.close();
@@ -218,37 +218,6 @@ public class ParserMain {
 
         return RobotConstants.resultList;
     }
-
-    /*private static List<Entity> getScriptList(String lineText, List<Entity> resultList, Integer currentLine, Integer level ,String logicFlag ,Integer pLine) {
-        Entity en = new Entity();
-        //TODO 首先判断当前行是什么函数
-        logicFlag = LogicUtil.getLogicType(lineText);
-        en.setType(logicFlag);
-        en.setLevel(level);
-        en.setPline(pLine);
-        en.setLine(currentLine);
-
-        level = level++;
-        if(LogicUtil.getLogic(lineText)){
-            //逻辑语句封装到list中
-            if(logicFlag.equals(RobotConstants.IF_TAG) || logicFlag.equals(RobotConstants.WHILE_TAG)){
-                List<Entity> subList = new ArrayList<>();
-                en.setAttribution(logicFlag);
-                en.setHaveSub(RobotConstants.TRUE);
-                subList.add(en);
-                getScriptList(lineText , subList , currentLine + 1 ,level , logicFlag ,currentLine);
-            } else if(logicFlag.equals(RobotConstants.END_WHILE_TAG) || logicFlag.equals(RobotConstants.END_WHILE_TAG)){
-                en.setHaveSub(RobotConstants.FALSE);
-                return resultList;
-            } else {
-
-            }
-
-            logicalPackage(lineText, resultList, currentLine,logicFlag);
-            currentLine++;
-        }
-        return resultList;
-    }*/
 
     /**
      * 注释/空行判断,如果是注释或者空行，则返回对应的类型
@@ -268,45 +237,6 @@ public class ParserMain {
         }
         return lineText;
     }
-
-    /**
-     * 获取函数处于的行
-     * 并将拆解开后的函数存入list中
-     * @param lineText      脚本文件中当前行书
-     * @param resultList    存储脚本结构的list
-     * @param currentLine   当前行
-     * @param logicFlag     逻辑标签，标签值为if或者elif,用于标记当前行的函数是否属于逻辑判断体
-     * @return
-     * @throws SubException
-     */
-    /*private static int getCurrentLine(String lineText, List<Entity> resultList, int currentLine ,String logicFlag)  {
-        String handleName;
-        int strCount;
-        if (StringUtils.isNotEmpty(lineText.trim())){
-            //创建结果map，最终结果处理为Map<String , Object[]>
-            Map result = Maps.newHashMap();
-            //兼容支持在同一行内编辑多个函数，以分号分割
-            strCount = getFunctionCount(lineText, ";");
-            if(strCount >= 1){
-                String [] textArr = lineText.split(";");
-                //循环取出函数并放入resultList里
-                for (String text : textArr) {
-                    int index = text.indexOf(RobotConstants.PARAM_START_TAG);
-                    handleName = text.substring(0 , index);
-                    if(StringUtils.isNotEmpty(logicFlag))
-                        //如果逻辑标记不为空，则在函数前加入其逻辑标签
-                        result.put( logicFlag + "-" +handleName.trim() , StringUtils.getParamValue(text , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
-                    else
-                        //逻辑标签为空则略过
-                        result.put(handleName , StringUtils.getParamValue(text , RobotConstants.PARAM_START_TAG , RobotConstants.PARAM_END_TAG));
-                    resultList.add(result);
-                    currentLine++;
-                }
-            }
-
-        }
-        return currentLine;
-    }*/
 
     /**
      * 获取函数处于的行
@@ -349,42 +279,12 @@ public class ParserMain {
         return -1;
     }
 
-
-
-    /**
-     * 将if函数封装
-     * @param lineText
-     */
-    /*private static void logicalPackage(String lineText , List<Entity> upperLayerList , Integer currentLine ,String logicFlag) {
-        //首先进行if语句的语法判断
-        //if语句的语法为        if(表达式):
-        //如果是if语句，则最后以冒号结尾
-        Map result = Maps.newHashMap();
-        if (lineText.endsWith(":")) {
-            //取出括号中的表达式
-            String expression = StringUtils.getParamValue(lineText, RobotConstants.PARAM_START_TAG, RobotConstants.PARAM_END_TAG);
-            // TODO 判断if中是正常表达式，还是自定义的函数
-            *//*
-                得到的表达式中是否包含括号，如果有括号，则取出括号前的字符
-                例如methodA();  则取出methodA判断是否是系统中定义的方法
-            *//*
-            result.put(logicFlag.trim(), expression);
-            upperLayerList.add(result);
-        }else{
-            result.put(lineText.trim(), null);
-            upperLayerList.add(result);
-        }
-    }*/
-
     /**
      * 脚本执行方法
      * @param dataMap
      * @param scriptList    脚本集,脚本的所有数据都在list中，list中的map为已被分解的方法名和参数
      */
     public static void action(Map<String, String> dataMap, List<Entity> scriptList) throws SubException {
-        String logicFlag = null;
-        //因为else没有判断体，用来单独判断是否进入else
-        boolean elseFleg = true;
         //行数
         int line = 0;
         Map<Integer ,String> flagMap = Maps.newHashMap();
@@ -431,36 +331,14 @@ public class ParserMain {
             System.out.println("读取动作 ：" + handleName);
             getLogicFlagAndInvokeHandleMethod(flagMap , dataMap, handleEntity);
             line++;
-            //判断当前属于什么函数
-//            LogicUtil.getLogicStr(handleName);
-//            if()
-            //如果当前逻辑包装体不为空，则只进入对应的逻辑分支
-            /*if(StringUtils.isNotEmpty(currentLogicBody)){
-                elseFleg = false;
-                //判断函数是否包含逻辑包装体，包含说明是子逻辑块，进入执行，否则跳过
-                if(handleName.contains(currentLogicBody)){
-                    //将包装体替换
-                    handleName = handleName.replace(currentLogicBody , "");
-                }else{
-                    logicFlag = null;
-                }
-            }else {
-                //如果逻辑包装体为空，则判断即将执行的函数是否包含包装体，如包含则略过，因为上一层的逻辑判断结果为false
-                if(handleName.contains(RobotConstants.IF_TAG_HANDLE)
-                        || handleName.contains(RobotConstants.ELIF_TAG_HANDLE)
-                        || handleName.contains(RobotConstants.ELSE_TAG_HANDLE))
-                    continue;
-            }*/
         }
     }
 
     /**
-     * 根据逻辑标签，选择执行的方法,并返回接下来需要执行的逻辑
+     * 根据flagMap中的标签，选择接下来需要执行的逻辑，主要用于if/else的判断
+     * @param flagMap       用于逻辑判断的map
      * @param dataMap       excel中读取的数据
-     * @param handleEntity    脚本当前行
-//     * @param logicFlag     逻辑标签
-//     * @param handleName    操作名称
-//     * @param parameter        参数
+     * @param handleEntity    每行脚本封装后的实体
      * @return
      * @throws SubException
      */

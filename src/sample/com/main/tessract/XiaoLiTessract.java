@@ -95,7 +95,7 @@ public class XiaoLiTessract {
 
     public static void main(String[] args) throws AWTException, SubException {
         HandleService.getSingleton().cut();
-        Map a = XiaoLiTessract.general("C:\\image.png", "网上缴费" );
+        Map a = XiaoLiTessract.general("C:\\123.png", "网上缴费" );
         System.out.println(a.isEmpty());
 //        XiaoLiTessract.imgOcrGetResultStr("C:\\Users\\Administrator\\Desktop\\微信图片_20210129121416.png");
 //        XiaoLiTessract.imgOcrGetResultStr("C:\\image.png");

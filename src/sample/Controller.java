@@ -1,5 +1,6 @@
 package sample;
 
+import org.python.antlr.op.Sub;
 import sample.com.constants.Entity;
 import sample.com.constants.HotKeyConstants;
 import sample.com.constants.RobotConstants;
@@ -64,6 +65,10 @@ public class Controller implements ControlledStage, Initializable  {
 
     @FXML
     public Button stop;         //停止按钮
+
+    @FXML
+    public TextField startLine;         //起始执行行，从第几行开始执行excel
+
 
     private StageController myController;
 
@@ -144,6 +149,8 @@ public class Controller implements ControlledStage, Initializable  {
 //                    dataField.setText("E:\\文档\\项目资料\\智能机器人\\测试资料\\2_平顶山要素表.xlsx");
                     String dataFieldText = dataField.getText();
                     String scriptFieldText = scriptField.getText();
+                    String currentDataLine = startLine.getText().trim();
+                    Integer currentDataLineInt = 0;
 
                     String delay = normalDelay.getText();
                     ProxyFactory.nomalDelay = delay;
@@ -159,9 +166,17 @@ public class Controller implements ControlledStage, Initializable  {
                     scriptButton.setDisable(true);
                     pause.setDisable(false);
                     start.setDisable(true);
+                    startLine.setDisable(true);
+                    normalDelay.setDisable(true);
 
                     // 1 在事件源对象注册 source.setOnXEventType(listener)
                     try {
+                        if(StringUtils.isNotEmpty(currentDataLine)){
+                            currentDataLineInt = Integer.parseInt(currentDataLine);
+                            if(currentDataLineInt <= 0){
+                                throw new SubException("起始执行行需为正整数\n");
+                            }
+                        }
                         TextArea.appendText("准备开始执行\n");
                         Thread.sleep(3000);
 
@@ -172,8 +187,17 @@ public class Controller implements ControlledStage, Initializable  {
                         TextArea.appendText("读取案件信息表数据\n");
                         List<Map<String ,String >> list = readExcelUtil.getObjectsList();
                         //循环excel表格中的所有数据
-                        int listIndex = 1;
-                        for (Map<String ,String > dataMap : list) {
+
+                        int dataCount = list.size();
+                        if(dataCount < currentDataLineInt) {
+                            String execute_excel_line = "要素表中不足" + currentDataLineInt + "条记录,表中记录为" + dataCount + "条\n";
+//                            Platform.runLater(() -> TextArea.appendText(execute_excel_line));
+                            throw new SubException(execute_excel_line);
+                        }
+
+//                        int currentExcuteLine = currentDataLine;
+                        while (currentDataLineInt <= dataCount) {
+                            Map<String ,String > dataMap = list.get(currentDataLineInt - 1 );
                             boolean isPause = RobotConstants.OPERATING_VAR.equals("pause");
                             if(isPause) {
                                 Platform.runLater(() -> TextArea.appendText("程序已暂停\n"));
@@ -189,21 +213,28 @@ public class Controller implements ControlledStage, Initializable  {
                             //2、读取脚本文件，并返回脚本集，封为List
                             List<Entity> result = ParserMain.readScriptForList(scriptFieldText);
                             Platform.runLater(() -> TextArea.appendText("脚本总共" + result.size() + "行\n"));
-                            String execute_excel_line = "正在执行第" + listIndex + "条表格记录\n";
+                            String execute_excel_line = "正在执行第" + currentDataLineInt + "条表格记录\n";
                             Platform.runLater(() -> TextArea.appendText(execute_excel_line));
 
                             ParserMain.action(dataMap, result);
                             //显示正在执行第几条记录
-                            String execute_excel_line_finish = "第" + listIndex + "条记录执行完毕，正在执行下一条\n";
+                            String execute_excel_line_finish = "第" + currentDataLineInt + "条记录执行完毕，正在执行下一条\n";
                             Platform.runLater(() -> TextArea.appendText(execute_excel_line_finish));
                             //停止操作，退出循环
                             if(RobotConstants.OPERATING_VAR.equals("stop")){
                                 Platform.runLater(() -> TextArea.appendText("正在停止运行，请等待。\n"));
                                 break;
                             }
-                            listIndex++;
+                            currentDataLineInt++;
+                            scriptField.setText(currentDataLineInt.toString());
                             Platform.runLater(() -> TextArea.appendText("一条数据执行完毕，请点击开始继续运行。\n"));
-                            pause();
+                            if(currentDataLineInt >= dataCount){
+                                Platform.runLater(() -> TextArea.appendText("当前要素表已执行完毕，准备停止程序。\n"));
+                                stop();
+                            }else{
+                                pause();
+                            }
+
 
 //                            String str = sc.nextLine();
 
@@ -216,13 +247,17 @@ public class Controller implements ControlledStage, Initializable  {
                         Platform.runLater(() -> TextArea.appendText("读取数据出错，请检查文件路径是否正确\n"));
                     } catch (SubException e) {
                         LoggerUtils.error(this.getClass() , e.getMessage() , e);
-                        TextArea.appendText(e.getMessage());
                         Platform.runLater(() -> TextArea.appendText(e.getMessage()));
+                    } catch (NumberFormatException e){
+                        LoggerUtils.error(this.getClass() , "起始执行行需为正整数\n" , e );
+                        Platform.runLater(() -> TextArea.appendText("起始执行行需为正整数\n"));
                     } finally {
                         dataField.setDisable(false);
                         scriptField.setDisable(false);
+                        startLine.setDisable(false);
                         dataButton.setDisable(false);
                         scriptButton.setDisable(false);
+                        normalDelay.setDisable(false);
                         pause.setDisable(true);
                         start.setDisable(false);
                         RobotConstants.OPERATING_VAR = "start";
