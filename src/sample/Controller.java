@@ -174,6 +174,9 @@ public class Controller implements ControlledStage, Initializable  {
                         if(currentDataLineInt <= 0){
                             throw new SubException("起始执行行需为正整数\n");
                         }
+                    }else{
+                        startLine.setText("1");
+                        currentDataLineInt = 1;
                     }
                     TextArea.appendText("准备开始执行\n");
                     Thread.sleep(3000);
