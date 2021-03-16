@@ -294,14 +294,14 @@ public class ParserMain {
             String type = handleEntity.getType();
             //如果暂停变量为初始值，则可通过，初始值为false
             //点击暂停键后变量修改为true，为true时则死循环作为暂停
-            while (RobotConstants.OPERATING_VAR.equals("pause")){
-                LoggerUtils.warning(ParserMain.class,"程序已暂停....\n");
-                try {
-                    HandleService.getRobot().delay(3000);
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
-            }
+//            while (RobotConstants.OPERATING_VAR.equals("pause")){
+//                LoggerUtils.warning(ParserMain.class,"程序已暂停....\n");
+//                try {
+//                    HandleService.getRobot().delay(3000);
+//                } catch (AWTException e) {
+//                    e.printStackTrace();
+//                }
+//            }
             //如变量变成stop
             //则退出循环，结束运行
             if(RobotConstants.OPERATING_VAR.equals("stop")){

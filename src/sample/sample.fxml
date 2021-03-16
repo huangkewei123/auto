@@ -16,9 +16,9 @@
                         <Button fx:id="scriptButton" layoutX="580.0" layoutY="64.0" mnemonicParsing="false" onAction="#getScriptFilePath" prefHeight="23.0" prefWidth="76.0" text="导入脚本" />
                         <TextField fx:id="scriptField" layoutX="136.0" layoutY="64.0" prefHeight="23.0" prefWidth="415.0" />
                         <Label layoutX="63.0" layoutY="64.0" prefHeight="23.0" prefWidth="73.0" text="执行脚本：" />
-                        <Button fx:id="start" layoutX="387.0" layoutY="111.0" mnemonicParsing="false" onAction="#start" prefHeight="23.0" prefWidth="76.0" text="开始执行" />
-                        <Button fx:id="pause" layoutX="484.0" layoutY="111.0" mnemonicParsing="false" onAction="#pause" prefHeight="23.0" prefWidth="76.0" text="暂停" />
-                        <Button fx:id="stop" layoutX="580.0" layoutY="111.0" mnemonicParsing="false" onAction="#stop" prefHeight="23.0" prefWidth="76.0" text="结束" />
+                        <Button fx:id="start" layoutX="475.0" layoutY="111.0" mnemonicParsing="false" onAction="#start" prefHeight="23.0" prefWidth="76.0" text="开始执行" />
+<!--                        <Button fx:id="pause" layoutX="484.0" layoutY="111.0" mnemonicParsing="false" onAction="#pause" prefHeight="23.0" prefWidth="76.0" text="暂停" />-->
+                        <Button fx:id="stop" layoutX="580.0" layoutY="111.0" mnemonicParsing="false" onAction="#stopTask" prefHeight="23.0" prefWidth="76.0" text="结束" />
                         <Label layoutX="63.0" layoutY="100.0" prefHeight="23.0" prefWidth="73.0" text="标准延迟：" />
                         <TextField fx:id="normalDelay" layoutX="136.0" layoutY="100.0" prefHeight="23.0" prefWidth="42.0" />
                         <TextField fx:id="startLine" layoutX="136.0" layoutY="134.0" prefHeight="23.0" prefWidth="54.0" />

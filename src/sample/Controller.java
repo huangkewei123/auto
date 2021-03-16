@@ -1,5 +1,9 @@
 package sample;
 
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import org.python.antlr.op.Sub;
 import sample.com.constants.Entity;
 import sample.com.constants.HotKeyConstants;
@@ -19,9 +23,6 @@ import sample.com.utils.excel.ReadExcelUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -32,10 +33,8 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Scanner;
 
 public class Controller implements ControlledStage, Initializable  {
 
@@ -60,8 +59,8 @@ public class Controller implements ControlledStage, Initializable  {
     @FXML
     public Button start;        //开始按钮
 
-    @FXML
-    public Button pause;        //暂停按钮
+//    @FXML
+//    public Button pause;        //暂停按钮
 
     @FXML
     public Button stop;         //停止按钮
@@ -76,7 +75,7 @@ public class Controller implements ControlledStage, Initializable  {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        pause.setDisable(true);
+//        pause.setDisable(true);
         this.setStageController(myController);
         // 添加热键监听器
         this.register();
@@ -137,144 +136,144 @@ public class Controller implements ControlledStage, Initializable  {
      */
     public void start() {
 
-        if(RobotConstants.OPERATING_VAR.equals("pause")){
-            pause.setDisable(false);
+        if(RobotConstants.OPERATING_VAR.equals("stop")){
+//            pause.setDisable(false);
+            stop.setDisable(false);
             start.setDisable(true);
             RobotConstants.OPERATING_VAR = "start";
         }else
-
-            ThreadConfiguration.THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+            ThreadConfiguration.THREAD_POOL.execute(() ->  {
 //                    dataField.setText("E:\\文档\\项目资料\\智能机器人\\测试资料\\2_平顶山要素表.xlsx");
-                    String dataFieldText = dataField.getText();
-                    String scriptFieldText = scriptField.getText();
-                    String currentDataLine = startLine.getText().trim();
-                    Integer currentDataLineInt = 0;
+                ThreadConfiguration.consoleThreadMap.put("autoMain", Thread.currentThread());
+                String dataFieldText = dataField.getText();
+                String scriptFieldText = scriptField.getText();
+                String currentDataLine = startLine.getText().trim();
+                Integer currentDataLineInt = 0;
 
-                    String delay = normalDelay.getText();
-                    ProxyFactory.nomalDelay = delay;
-                    if(StringUtils.isEmpty(scriptFieldText) || StringUtils.isEmpty(dataFieldText)){
-                        Platform.runLater(() -> TextArea.appendText("未选择案件信息表或执行脚本，请选择完成后开始执行\n"));
-                        LoggerUtils.error(this.getClass(),"未选择案件信息表或执行脚本，请选择完成后开始执行");
-                        return ;
+                String delay = normalDelay.getText();
+                ProxyFactory.nomalDelay = delay;
+                if(StringUtils.isEmpty(scriptFieldText) || StringUtils.isEmpty(dataFieldText)){
+                    Platform.runLater(() -> TextArea.appendText("未选择案件信息表或执行脚本，请选择完成后开始执行\n"));
+                    LoggerUtils.error(this.getClass(),"未选择案件信息表或执行脚本，请选择完成后开始执行");
+                    return ;
+                }
+                //文本框和按钮失效
+                dataField.setDisable(true);
+                scriptField.setDisable(true);
+                dataButton.setDisable(true);
+                scriptButton.setDisable(true);
+//                pause.setDisable(false);
+                start.setDisable(true);
+                startLine.setDisable(true);
+                normalDelay.setDisable(true);
+
+                // 1 在事件源对象注册 source.setOnXEventType(listener)
+                try {
+                    if(StringUtils.isNotEmpty(currentDataLine)){
+                        currentDataLineInt = Integer.parseInt(currentDataLine);
+                        if(currentDataLineInt <= 0){
+                            throw new SubException("起始执行行需为正整数\n");
+                        }
                     }
-                    //文本框和按钮失效
-                    dataField.setDisable(true);
-                    scriptField.setDisable(true);
-                    dataButton.setDisable(true);
-                    scriptButton.setDisable(true);
-                    pause.setDisable(false);
-                    start.setDisable(true);
-                    startLine.setDisable(true);
-                    normalDelay.setDisable(true);
+                    TextArea.appendText("准备开始执行\n");
+                    Thread.sleep(3000);
 
-                    // 1 在事件源对象注册 source.setOnXEventType(listener)
-                    try {
-                        if(StringUtils.isNotEmpty(currentDataLine)){
-                            currentDataLineInt = Integer.parseInt(currentDataLine);
-                            if(currentDataLineInt <= 0){
-                                throw new SubException("起始执行行需为正整数\n");
-                            }
-                        }
-                        TextArea.appendText("准备开始执行\n");
-                        Thread.sleep(3000);
-
-                        //键盘操作后再做下一步循环
+                    //键盘操作后再做下一步循环
 //                        Scanner sc = new Scanner(System.in);
-                        //1、读取数据表格
-                        ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
-                        TextArea.appendText("读取案件信息表数据\n");
-                        List<Map<String ,String >> list = readExcelUtil.getObjectsList();
-                        //循环excel表格中的所有数据
+                    //1、读取数据表格
+                    ReadExcelUtil readExcelUtil = new ReadExcelUtil(dataFieldText);
+                    TextArea.appendText("读取案件信息表数据\n");
+                    List<Map<String ,String >> list = readExcelUtil.getObjectsList();
+                    //循环excel表格中的所有数据
 
-                        int dataCount = list.size();
-                        if(dataCount < currentDataLineInt) {
-                            String execute_excel_line = "要素表中不足" + currentDataLineInt + "条记录,表中记录为" + dataCount + "条\n";
+                    int dataCount = list.size();
+                    if(dataCount < currentDataLineInt) {
+                        String execute_excel_line = "要素表中不足" + currentDataLineInt + "条记录,表中记录为" + dataCount + "条\n";
 //                            Platform.runLater(() -> TextArea.appendText(execute_excel_line));
-                            throw new SubException(execute_excel_line);
-                        }
+                        throw new SubException(execute_excel_line);
+                    }
 
 //                        int currentExcuteLine = currentDataLine;
-                        while (currentDataLineInt <= dataCount) {
-                            Map<String ,String > dataMap = list.get(currentDataLineInt - 1 );
-                            boolean isPause = RobotConstants.OPERATING_VAR.equals("pause");
-                            if(isPause) {
-                                Platform.runLater(() -> TextArea.appendText("程序已暂停\n"));
-                                while (isPause) {
-//                                    break;
-                                    try {
-                                        HandleService.getRobot().delay(3000);
-                                    } catch (AWTException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                            //2、读取脚本文件，并返回脚本集，封为List
-                            List<Entity> result = ParserMain.readScriptForList(scriptFieldText);
-                            Platform.runLater(() -> TextArea.appendText("脚本总共" + result.size() + "行\n"));
-                            String execute_excel_line = "正在执行第" + currentDataLineInt + "条表格记录\n";
-                            Platform.runLater(() -> TextArea.appendText(execute_excel_line));
+                    while (currentDataLineInt <= dataCount) {
+                        Map<String ,String > dataMap = list.get(currentDataLineInt - 1 );
+//                        boolean isPause = RobotConstants.OPERATING_VAR.equals("pause");
+//                        if(isPause) {
+//                            Platform.runLater(() -> TextArea.appendText("程序已暂停\n"));
+//                            while (isPause) {
+////                                    break;
+//                                try {
+//                                    HandleService.getRobot().delay(3000);
+//                                } catch (AWTException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }
+                        //2、读取脚本文件，并返回脚本集，封为List
+                        List<Entity> result = ParserMain.readScriptForList(scriptFieldText);
+                        Platform.runLater(() -> TextArea.appendText("脚本总共" + result.size() + "行\n"));
+                        String execute_excel_line = "正在执行第" + currentDataLineInt + "条表格记录\n";
+                        Platform.runLater(() -> TextArea.appendText(execute_excel_line));
 
-                            ParserMain.action(dataMap, result);
-                            //显示正在执行第几条记录
-                            String execute_excel_line_finish = "第" + currentDataLineInt + "条记录执行完毕，正在执行下一条\n";
-                            Platform.runLater(() -> TextArea.appendText(execute_excel_line_finish));
-                            //停止操作，退出循环
-                            if(RobotConstants.OPERATING_VAR.equals("stop")){
-                                Platform.runLater(() -> TextArea.appendText("正在停止运行，请等待。\n"));
-                                break;
-                            }
-                            currentDataLineInt++;
-                            scriptField.setText(currentDataLineInt.toString());
-                            Platform.runLater(() -> TextArea.appendText("一条数据执行完毕，请点击开始继续运行。\n"));
-                            if(currentDataLineInt >= dataCount){
-                                Platform.runLater(() -> TextArea.appendText("当前要素表已执行完毕，准备停止程序。\n"));
-                                stop();
-                            }else{
-                                pause();
-                            }
+                        ParserMain.action(dataMap, result);
+                        //显示正在执行第几条记录
+                        String execute_excel_line_finish = "第" + currentDataLineInt + "条记录执行完毕，正在执行下一条\n";
+                        Platform.runLater(() -> TextArea.appendText(execute_excel_line_finish));
+                        //停止操作，退出循环
+                        if(RobotConstants.OPERATING_VAR.equals("stop")){
+                            Platform.runLater(() -> TextArea.appendText("正在停止运行，请等待。\n"));
+                            break;
+                        }
+                        currentDataLineInt++;
+                        startLine.setText(currentDataLineInt.toString());
+                        Platform.runLater(() -> TextArea.appendText("一条数据执行完毕，请点击开始继续运行。\n"));
+                        if(currentDataLineInt >= dataCount){
+                            Platform.runLater(() -> TextArea.appendText("当前要素表已执行完毕，准备停止程序。\n"));
+                            stop();
+                            ThreadConfiguration.stopSpecifyThread("autoMain");
+                        }else{
+//                            pause();
+                            stop();
+                        }
 
 
 //                            String str = sc.nextLine();
 
-                        }
-                    } catch (InterruptedException e) {
-                        LoggerUtils.error(this.getClass() , "准备开始阶段出错\n" ,e);
-                        Platform.runLater(() -> TextArea.appendText("准备开始阶段出错,请重试\n"));
-                    } catch (IOException e) {
-                        LoggerUtils.error(this.getClass() , "读取数据出错，请检查文件路径是否正确\n" , e );
-                        Platform.runLater(() -> TextArea.appendText("读取数据出错，请检查文件路径是否正确\n"));
-                    } catch (SubException e) {
-                        LoggerUtils.error(this.getClass() , e.getMessage() , e);
-                        Platform.runLater(() -> TextArea.appendText(e.getMessage()));
-                    } catch (NumberFormatException e){
-                        LoggerUtils.error(this.getClass() , "起始执行行需为正整数\n" , e );
-                        Platform.runLater(() -> TextArea.appendText("起始执行行需为正整数\n"));
-                    } finally {
-                        dataField.setDisable(false);
-                        scriptField.setDisable(false);
-                        startLine.setDisable(false);
-                        dataButton.setDisable(false);
-                        scriptButton.setDisable(false);
-                        normalDelay.setDisable(false);
-                        pause.setDisable(true);
-                        start.setDisable(false);
-                        RobotConstants.OPERATING_VAR = "start";
-                        Platform.runLater(() -> TextArea.appendText("已结束。\n"));
                     }
+                } catch (InterruptedException e) {
+                    LoggerUtils.error(this.getClass() , "准备开始阶段出错\n" ,e);
+                    Platform.runLater(() -> TextArea.appendText("准备开始阶段出错,请重试\n"));
+                } catch (IOException e) {
+                    LoggerUtils.error(this.getClass() , "读取数据出错，请检查文件路径是否正确\n" , e );
+                    Platform.runLater(() -> TextArea.appendText("读取数据出错，请检查文件路径是否正确\n"));
+                } catch (SubException e) {
+                    LoggerUtils.error(this.getClass() , e.getMessage() , e);
+                    Platform.runLater(() -> TextArea.appendText(e.getMessage()));
+                } catch (NumberFormatException e){
+                    LoggerUtils.error(this.getClass() , "起始执行行需为正整数\n" , e );
+                    Platform.runLater(() -> TextArea.appendText("起始执行行需为正整数\n"));
+                } finally {
+                    dataField.setDisable(false);
+                    scriptField.setDisable(false);
+                    startLine.setDisable(false);
+                    dataButton.setDisable(false);
+                    scriptButton.setDisable(false);
+                    normalDelay.setDisable(false);
+//                    pause.setDisable(true);
+                    start.setDisable(false);
+                    RobotConstants.OPERATING_VAR = "start";
+                    Platform.runLater(() -> TextArea.appendText("已结束。\n"));
                 }
             });
     }
 
-    public void pause(){
-        if(RobotConstants.OPERATING_VAR.equals("start")){
-            TextArea.appendText("当前程序已暂停，请点击“开始”恢复执行\n");
-            RobotConstants.OPERATING_VAR = "pause";
-            start.setDisable(false);
-            pause.setDisable(true);
-        }
-    }
+//    public void pause(){
+//        if(RobotConstants.OPERATING_VAR.equals("start")){
+//            TextArea.appendText("当前程序已暂停，请点击“开始”恢复执行\n");
+//            RobotConstants.OPERATING_VAR = "pause";
+//            start.setDisable(false);
+//            pause.setDisable(true);
+//        }
+//    }
 
     /**
      * 停止线程池
@@ -282,6 +281,20 @@ public class Controller implements ControlledStage, Initializable  {
     public void stop(){
         RobotConstants.OPERATING_VAR = "stop";
         Platform.runLater(() -> TextArea.appendText("操作停止。\n"));
+    }
+
+    @FXML
+    public void stopTask() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("提醒");
+        alert.setContentText("是否停止运行？");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK) {
+            stop();
+            ThreadConfiguration.stopSpecifyThread("autoMain");
+        } else {
+            alert.close();
+        }
     }
 
     /**
@@ -297,7 +310,7 @@ public class Controller implements ControlledStage, Initializable  {
 //                    JOptionPane.showMessageDialog(null, "注册快捷键(Q):跳出弹框！", "提示消息", JOptionPane.WARNING_MESSAGE);
                     break;
                 case HotKeyConstants.HOT_KEY_PAUSE:     //暂停
-                    this.pause();
+//                    this.pause();
 //                    JOptionPane.showMessageDialog(null, "暂停程序", "提示消息", JOptionPane.WARNING_MESSAGE);
                     break;
             }

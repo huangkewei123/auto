@@ -461,10 +461,10 @@ public class HandleService {
      * 停止当前线程池所有任务
      * @return
      */
-    public boolean pause(){
-        RobotConstants.OPERATING_VAR = "pause";
-        return RobotConstants.TRUE;
-    }
+//    public boolean pause(){
+//        RobotConstants.OPERATING_VAR = "pause";
+//        return RobotConstants.TRUE;
+//    }
 
     /**
      * 根据表格中的日期在操作界面中自动选择对应日期

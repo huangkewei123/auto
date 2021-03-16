@@ -219,10 +219,10 @@ public class HandleController {
      * 暂停
      * @return
      */
-    public boolean pause() {
-        proxy.pause();
-        return RobotConstants.TRUE;
-    }
+//    public boolean pause() {
+//        proxy.pause();
+//        return RobotConstants.TRUE;
+//    }
 
     /**
      * 选择小程序中的表盘日期
